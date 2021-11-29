@@ -25,11 +25,13 @@ class TextPrint(object):
     def unindent(self):
         self.x -= 10
 
+        
+
 
 pygame.init()
 
 
-# Défini la taille de la fenetre (largeur, hauteur).
+# Définit la taille de la fenetre (largeur, hauteur).
 screen = pygame.display.set_mode((500, 700))
 
 pygame.display.set_caption("My Game")
