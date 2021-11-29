@@ -9,8 +9,11 @@ class IvyRadio ():
         self.vecteurDEtat = "^StateVector x=(.+) y=(.+) z=(.+) Vp=(.+) fpa=(.+) psi=(.+) phi=(.+)$"
         self.commandeAutoPilote = "^AutoPilot nx=(.+) nz=(.+) rollRate=(.+)$"
         #Messages à envoyer : 
+        self.commandeVitesse = "MM Vc={}"
         self.FCUAP = "FCUAP {}"
-        self.commandeModele = "APNxControl nx={}\nAPNzControl nz={}\nAPLatControl rollRate"
+        self.commandeModeleNx = "APNxControl nx={}"
+        self.commandeModeleNx = "APNzControl nz={}"
+        self.commandeModelep = "APLatControl rollRate={}"
 
         IvyBindMsg (self.onBoutonAPPush, self.btnPousse)
         IvyBindMsg (self.onRcvStateVector, self.vecteurDEtat)
@@ -30,10 +33,20 @@ class IvyRadio ():
     def onRcvStateVector (self,sender,x,y,z,Vp,fpa,psi,phi):
         pass
     def onRcvAPCommand (self,sender,nx, nz, p):
+        """Fonction appelée par une callback de message pilote automatique"""
         pass
         #Envoi de messages
+    def sendSpeedCommand (self, Vc):
+        """Envoie une commande de vitesse managée à l'autilote."""
+        self.sendMessage
+
     def sendAPState(self):
+        """Envoie l'état de l'autopilote."""
         état = getAPState ()
         self.sendMessage(self.FCUAP.format(état))
+
     def sendAircraftCommand (self,nx,nz,p):
-        self.sendMessage (self.commandeModele.format(nx,nz,p))
+        """Envoie les commandes de vol au modèle d'avion."""
+        self.sendMessage (self.commandeModeleNx.format(nx))
+        self.sendMessage (self.commandeModeleNz.format(nz))
+        self.sendMessage (self.commandeModelep.format (p))
