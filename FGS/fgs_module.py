@@ -2,15 +2,6 @@
 
 from ivy.std_api import *
 import time
-IvyInit("FGS", "Ready")
-IvyStart("10.1.127.255:2010") #IP à changer
-time.sleep(1.0)
-
-#IvySendMsg("")
-#IvyBindMsg(callback, "regex")
-
-#def generic_callback(sender, *data):
-#    pass
 
 class Waypoint:
     """
@@ -36,7 +27,9 @@ class FGS:
         Entrée: filename: string
         """
         pass
+        self.dirto_on = False
         self.load_flight_plan(filename)
+        #register les callbacks
 
     def on_state_vector(sender, *data):
         """Callback de StateVector
@@ -70,3 +63,15 @@ class FGS:
         Retourne: flight_plan: Waypoint list
         """
         pass
+
+IvyInit("FGS", "Ready")
+IvyStart("10.1.127.255:2010") #IP à changer
+time.sleep(1.0)
+fgs = FGS("pdv.txt")
+
+##### Pour référence future #####
+#IvySendMsg("")
+#IvyBindMsg(callback, "regex")
+
+#def generic_callback(sender, *data):
+#    pass
