@@ -1,1 +1,3 @@
 # Mini Manche
+
+Requis: pygame
