@@ -32,7 +32,8 @@ def load_flight_plan(filename):
     listWpt = []
     with open(filename,"r") as f:
         for ligne in f:
-            listWpt.append(ligne.split())
+            list = ligne.split()
+            listWpt.append(Waypoint(list[0],list[1],list[2],list[3],list[4]))
     return listWpt 
 
 class FGS:
@@ -61,7 +62,11 @@ class FGS:
         Sortie Ivy: 1 message sur Ivy
             - Target
         """
-        pass
+
+
+
+        def target():
+            pass
 
     def on_dirto(self, sender, *data):
         """Callback de DIRTO
