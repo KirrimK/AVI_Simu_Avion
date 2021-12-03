@@ -5,6 +5,7 @@ WHITE = pygame.Color('white')
 
 
 pLim = 30
+coeff_p = 5
 p = 0
 nzMin = -1
 nzMax = 2
@@ -14,7 +15,7 @@ seuil_x = 0.15
 def joystick2p(x, p):
     if abs(x) < seuil_x:
         x = 0
-    p+=x
+    p+=(x*coeff_p)
     if p > pLim:
         p = pLim
     if p < -pLim:
@@ -163,7 +164,7 @@ while not done:
     pygame.display.flip()
 
     # Limit to 20 frames per second.
-    clock.tick(20)
+    clock.tick(1)
 
 # Close the window and quit.
 # If you forget this line, the program will 'hang'
