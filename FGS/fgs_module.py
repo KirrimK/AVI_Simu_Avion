@@ -41,7 +41,7 @@ class FGS:
     L'objet contenant toutes les fonctions et variables du FGS
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename,WindComponent,MagneticDeclination):
         """Constructeur du FGS
         Arguments:
             - filename: string
@@ -50,6 +50,8 @@ class FGS:
         self.phi_max = 0 #radians
         self.flight_plan = load_flight_plan(filename)
         self.currenttarget = 0
+        self.wind = WindComponent
+        self.dm = MagneticDeclination
         IvyBindMsg(self.on_state_vector, STATEVEC_REGEX)
         IvyBindMsg(self.on_dirto, DIRTO_REGEX)
         IvyBindMsg(self.on_time_start, TIMESTART_REGEX)
@@ -84,7 +86,7 @@ class FGS:
             - WindComponent
             - MagneticDeclination
         """
-        pass
+        pass        
 
     def on_limit_msg(self, sender, *data):
         """Retourne une liste de Waypoints (un PDV) depuis un fichier
