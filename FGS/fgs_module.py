@@ -3,9 +3,9 @@
 from ivy.std_api import *
 import time
 
-STATEVEC_REGEX=""
-DIRTO_REGEX=""
-TIMESTART_REGEX=""
+STATEVEC_REGEX = "StateVector x=(\S+) y=(\S+) z=(\S+) Vp=(\S+) fpa=(\S+) psi=(\S+) phi=(\S+)"
+DIRTO_REGEX = "DIRTO Wpt=(\S+)"
+TIMESTART_REGEX = "Time t=1.0"
 LIMITES_REGEX = "MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)"
 
 InitStateVector=[0,0,0,110,0,0,0] #la vitesse de décollage est de 110 m/s
