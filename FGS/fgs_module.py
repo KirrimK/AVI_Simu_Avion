@@ -64,6 +64,13 @@ class FGS:
         """
         pass
 
+    def on_limit_msg(sender, *data):
+        """Retourne une liste de Waypoints (un PDV) depuis un fichier
+        Entrée Ivy: (Message de limites)
+        Sortie Ivy: Rien
+        """
+        pass
+
 IvyInit("FGS", "Ready")
 IvyStart("10.1.127.255:2010") #IP à changer
 time.sleep(1.0)
