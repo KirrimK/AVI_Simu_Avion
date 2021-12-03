@@ -3,7 +3,12 @@
 from ivy.std_api import *
 import time
 
+STATEVEC_REGEX = "StateVector x=(\S+) y=(\S+) z=(\S+) Vp=(\S+) fpa=(\S+) psi=(\S+) phi=(\S+)"
+DIRTO_REGEX = "DIRTO Wpt=(\S+)"
+TIMESTART_REGEX = "Time t=1.0"
 LIMITES_REGEX = "MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)"
+
+InitStateVector=[0,0,0,110,0,0,0] #la vitesse de décollage est de 110 m/s
 
 class Waypoint:
     """
@@ -24,14 +29,19 @@ def load_flight_plan(filename):
     Arguments: filename: string
     Retourne: flight_plan: Waypoint list
     """
-    pass
+    listWpt = []
+    with open(filename,"r") as f:
+        for ligne in f:
+            list = ligne.split()
+            listWpt.append(Waypoint(list[0],list[1],list[2],list[3],list[4]))
+    return listWpt 
 
 class FGS:
     """
     L'objet contenant toutes les fonctions et variables du FGS
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename,WindComponent,MagneticDeclination):
         """Constructeur du FGS
         Arguments:
             - filename: string
@@ -39,19 +49,26 @@ class FGS:
         self.dirto_on = False
         self.phi_max = 0 #radians
         self.flight_plan = load_flight_plan(filename)
-        #register les callbacks
-        IvyBindMsg()
-        IvyBindMsg()
-        IvyBindMsg()
+        self.currenttarget = 0
+        self.wind = WindComponent
+        self.dm = MagneticDeclination
+        IvyBindMsg(self.on_state_vector, STATEVEC_REGEX)
+        IvyBindMsg(self.on_dirto, DIRTO_REGEX)
+        IvyBindMsg(self.on_time_start, TIMESTART_REGEX)
         IvyBindMsg(self.on_limit_msg, LIMITES_REGEX)
 
     def on_state_vector(self, sender, *data):
         """Callback de StateVector
-        Entrée Ivy: (A écrire, des strings)
+        Entrée Ivy:
+            - x, y, z, vp, fpa, psi, phi: floats
         Sortie Ivy: 1 message sur Ivy
             - Target
         """
-        pass
+
+
+
+        def target():
+            pass
 
     def on_dirto(self, sender, *data):
         """Callback de DIRTO
@@ -69,7 +86,7 @@ class FGS:
             - WindComponent
             - MagneticDeclination
         """
-        pass
+        pass        
 
     def on_limit_msg(self, sender, *data):
         """Retourne une liste de Waypoints (un PDV) depuis un fichier
@@ -85,7 +102,6 @@ if __name__=="__main__":
     IvyStart("10.1.127.255:2010") #IP à changer
     time.sleep(1.0)
     fgs = FGS("pdv.txt")
-
 
 ##### Pour référence future #####
 #IvySendMsg("")
