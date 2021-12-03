@@ -42,7 +42,6 @@ class FGS:
         self.dirto_on = False
         self.phi_max = 0 #radians
         self.flight_plan = load_flight_plan(filename)
-        #register les callbacks
         IvyBindMsg(self.on_state_vector, _REGEX)
         IvyBindMsg(self.on_dirto, _REGEX)
         IvyBindMsg(self.on_time_start, _REGEX)
