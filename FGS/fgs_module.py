@@ -8,14 +8,21 @@ class Waypoint:
     Objet contenant les informations d'un Waypoint
     """
     def __init__(self, name, x, y, z, mode):
-        self.name = name
-        self.x = x
-        self.y = y
-        self.z = z
-        self.mode = mode
+        self.name = name #string
+        self.x = x #float
+        self.y = y #float
+        self.z = z #float
+        self.mode = mode #string: "overFly" | "flyBy"
 
     def infos(self):
         return (self.name, self.x, self.y, self.z, self.mode)
+
+def load_flight_plan(filename):
+    """Retourne une liste de Waypoints (un PDV) depuis un fichier
+    Arguments: filename: string
+    Retourne: flight_plan: Waypoint list
+    """
+    pass
 
 class FGS:
     """
@@ -24,17 +31,17 @@ class FGS:
 
     def __init__(self, filename):
         """Constructeur du FGS
-        Entrée: filename: string
+        Arguments: filename: string
         """
         pass
         self.dirto_on = False
-        self.load_flight_plan(filename)
+        self.flight_plan = load_flight_plan(filename)
         #register les callbacks
 
     def on_state_vector(sender, *data):
         """Callback de StateVector
         Entrée Ivy: (A écrire, des strings)
-        Sortie Ivy: Aucun message ou 1 message
+        Sortie Ivy: 1 message sur Ivy
             - Target
         """
         pass
@@ -57,24 +64,18 @@ class FGS:
         """
         pass
 
-    def load_flight_plan(filename):
-        """Retourne une liste de Waypoints (un PDV) depuis un fichier
-        Arguments: filename: string
-        Retourne: flight_plan: Waypoint list
-        """
-        pass
-
     def on_limit_msg(sender, *data):
         """Retourne une liste de Waypoints (un PDV) depuis un fichier
         Entrée Ivy: (Message de limites)
-        Sortie Ivy: Rien
+        Sortie: Met à jour le phi max en mémoire
         """
         pass
 
-IvyInit("FGS", "Ready")
-IvyStart("10.1.127.255:2010") #IP à changer
-time.sleep(1.0)
-fgs = FGS("pdv.txt")
+if __name__=="__main__":
+    IvyInit("FGS", "Ready")
+    IvyStart("10.1.127.255:2010") #IP à changer
+    time.sleep(1.0)
+    fgs = FGS("pdv.txt")
 
 ##### Pour référence future #####
 #IvySendMsg("")
