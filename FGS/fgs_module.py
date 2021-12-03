@@ -3,6 +3,9 @@
 from ivy.std_api import *
 import time
 
+
+
+_REGEX=""
 LIMITES_REGEX = "MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)"
 
 class Waypoint:
@@ -40,9 +43,9 @@ class FGS:
         self.phi_max = 0 #radians
         self.flight_plan = load_flight_plan(filename)
         #register les callbacks
-        IvyBindMsg()
-        IvyBindMsg()
-        IvyBindMsg()
+        IvyBindMsg(self.on_state_vector, _REGEX)
+        IvyBindMsg(self.on_dirto, _REGEX)
+        IvyBindMsg(self.on_time_start, _REGEX)
         IvyBindMsg(self.on_limit_msg, LIMITES_REGEX)
 
     def on_state_vector(self, sender, *data):
@@ -85,7 +88,6 @@ if __name__=="__main__":
     IvyStart("10.1.127.255:2010") #IP à changer
     time.sleep(1.0)
     fgs = FGS("pdv.txt")
-
 
 ##### Pour référence future #####
 #IvySendMsg("")
