@@ -27,7 +27,11 @@ def load_flight_plan(filename):
     Arguments: filename: string
     Retourne: flight_plan: Waypoint list
     """
-    pass
+    listWpt = []
+        with open(filename,"r") as f:
+        for ligne in f:
+            listWpt.append(ligne.split())
+    return listWpt 
 
 class FGS:
     """
