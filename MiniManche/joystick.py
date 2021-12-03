@@ -5,6 +5,10 @@ WHITE = pygame.Color('white')
 
 
 pLim = 30
+p = 0
+nzMin = -1
+nzMax = 2
+nz = 0
 seuil_x = 0.15
 
 def joystick2p(x, p):
@@ -17,7 +21,15 @@ def joystick2p(x, p):
         p = -pLim
     return p
 
-p = 0
+def joystick2nz(x, nz):
+    if abs(x) < seuil_x:
+        x = 0
+    nz+=x
+    if nz > nzMax:
+        nz = nzMax
+    if nz < nzMin:
+        nz = nzMin
+    return nz
 
 # Classe qui permet d'afficher les données du joystick
 class TextPrint(object):
@@ -126,6 +138,10 @@ while not done:
         textPrint.tprint(screen, "Axis 0 value: {:>6.3f}".format(axis))
         p = joystick2p(axis, p)
         textPrint.tprint(screen, "p = {}".format(p))
+        axis = joystick.get_axis(1)
+        textPrint.tprint(screen, "Axis 1 value: {:>6.3f}".format(axis))
+        nz = joystick2nz(axis, nz)
+        textPrint.tprint(screen, "nz = {}".format(nz))
         textPrint.unindent()
 
         buttons = joystick.get_numbuttons()
@@ -137,18 +153,6 @@ while not done:
             textPrint.tprint(screen,
                              "Button {:>2} value: {}".format(i, button))
         textPrint.unindent()
-
-        hats = joystick.get_numhats()
-        textPrint.tprint(screen, "Number of hats: {}".format(hats))
-        textPrint.indent()
-
-        # Hat position. All or nothing for direction, not a float like
-        # get_axis(). Position is a tuple of int values (x, y).
-        for i in range(hats):
-            hat = joystick.get_hat(i)
-            textPrint.tprint(screen, "Hat {} value: {}".format(i, str(hat)))
-        textPrint.unindent()
-
         textPrint.unindent()
 
     #
