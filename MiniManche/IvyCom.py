@@ -1,6 +1,6 @@
 from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
 class IvyRadio ():
-    def  __innit__ (self):
+    def  __init__ (self):
         self.nom = 'MiniManche'
         IvyInit (self.nom,self.nom+" is ready!")
         self.bus = "127.255.255.255:2010"

@@ -3,6 +3,22 @@ import pygame
 BLACK = pygame.Color('black')
 WHITE = pygame.Color('white')
 
+
+pLim = 30
+seuil_x = 0.15
+
+def joystick2p(x, p):
+    if abs(x) < seuil_x:
+        x = 0
+    p+=x
+    if p > pLim:
+        p = pLim
+    if p < -pLim:
+        p = -pLim
+    return p
+
+p = 0
+
 # Classe qui permet d'afficher les données du joystick
 class TextPrint(object):
     def __init__(self):
@@ -106,9 +122,10 @@ while not done:
         textPrint.tprint(screen, "Number of axes: {}".format(axes))
         textPrint.indent()
 
-        for i in range(axes):
-            axis = joystick.get_axis(i)
-            textPrint.tprint(screen, "Axis {} value: {:>6.3f}".format(i, axis))
+        axis = joystick.get_axis(0)
+        textPrint.tprint(screen, "Axis 0 value: {:>6.3f}".format(axis))
+        p = joystick2p(axis, p)
+        textPrint.tprint(screen, "p = {}".format(p))
         textPrint.unindent()
 
         buttons = joystick.get_numbuttons()
