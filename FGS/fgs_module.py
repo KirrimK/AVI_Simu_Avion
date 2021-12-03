@@ -48,6 +48,7 @@ class FGS:
         self.dirto_on = False
         self.phi_max = 0 #radians
         self.flight_plan = load_flight_plan(filename)
+        self.currenttarget = 0
         IvyBindMsg(self.on_state_vector, STATEVEC_REGEX)
         IvyBindMsg(self.on_dirto, DIRTO_REGEX)
         IvyBindMsg(self.on_time_start, TIMESTART_REGEX)
@@ -55,7 +56,8 @@ class FGS:
 
     def on_state_vector(self, sender, *data):
         """Callback de StateVector
-        Entrée Ivy: (A écrire, des strings)
+        Entrée Ivy:
+            - x, y, z, vp, fpa, psi, phi: floats
         Sortie Ivy: 1 message sur Ivy
             - Target
         """
