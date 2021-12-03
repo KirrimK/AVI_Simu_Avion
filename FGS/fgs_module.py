@@ -31,12 +31,16 @@ class FGS:
 
     def __init__(self, filename):
         """Constructeur du FGS
-        Arguments: filename: string
+        Arguments:
+            - filename: string
         """
-        pass
         self.dirto_on = False
         self.flight_plan = load_flight_plan(filename)
         #register les callbacks
+        IvyBindMsg()
+        IvyBindMsg()
+        IvyBindMsg()
+        IvyBindMsg()
 
     def on_state_vector(sender, *data):
         """Callback de StateVector
@@ -76,6 +80,7 @@ if __name__=="__main__":
     IvyStart("10.1.127.255:2010") #IP à changer
     time.sleep(1.0)
     fgs = FGS("pdv.txt")
+
 
 ##### Pour référence future #####
 #IvySendMsg("")
