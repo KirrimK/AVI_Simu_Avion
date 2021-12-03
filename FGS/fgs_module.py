@@ -49,7 +49,8 @@ class FGS:
         self.dirto_on = False
         self.phi_max = 0 #radians
         self.flight_plan = load_flight_plan(filename)
-        self.currenttarget = 0
+        self.current_target_on_plan = 0
+        self.lastsenttarget = ""
         IvyBindMsg(self.on_state_vector, STATEVEC_REGEX)
         IvyBindMsg(self.on_dirto, DIRTO_REGEX)
         IvyBindMsg(self.on_time_start, TIMESTART_REGEX)
@@ -62,11 +63,18 @@ class FGS:
         Sortie Ivy: 1 message sur Ivy
             - Target
         """
+        pass
+        #mettre à jour les infos connues sur l'avion (unpack data)
+        #si mode dirto pas enclenché:
+            #séquençage
 
-
-
-        def target():
-            pass
+            #envoyer la prochaine target
+        #sinon
+            #si wpt a été dépassé (overFly)
+                #envoyer dirtorequest
+                #continuer à envoyer la même target tant que pas de nv dirto
+            #sinon
+                #envoyer la même requête qui a été générée lors de la reception du dirto
 
     def on_dirto(self, sender, *data):
         """Callback de DIRTO
