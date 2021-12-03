@@ -3,9 +3,9 @@
 from ivy.std_api import *
 import time
 
-
-
-_REGEX=""
+STATEVEC_REGEX=""
+DIRTO_REGEX=""
+TIMESTART_REGEX=""
 LIMITES_REGEX = "MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)"
 
 class Waypoint:
@@ -46,9 +46,9 @@ class FGS:
         self.dirto_on = False
         self.phi_max = 0 #radians
         self.flight_plan = load_flight_plan(filename)
-        IvyBindMsg(self.on_state_vector, _REGEX)
-        IvyBindMsg(self.on_dirto, _REGEX)
-        IvyBindMsg(self.on_time_start, _REGEX)
+        IvyBindMsg(self.on_state_vector, STATEVEC_REGEX)
+        IvyBindMsg(self.on_dirto, DIRTO_REGEX)
+        IvyBindMsg(self.on_time_start, TIMESTART_REGEX)
         IvyBindMsg(self.on_limit_msg, LIMITES_REGEX)
 
     def on_state_vector(self, sender, *data):
