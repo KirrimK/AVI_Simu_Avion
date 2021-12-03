@@ -1,4 +1,14 @@
 from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QWidget
+
+class objetQt (QWidget):
+    BoutonPousseSignal = pyqtSignal()
+    VecteurDEtatSignal = pyqtSignal (tuple)
+    CommandeAPSignal = pyqtSignal (tuple)
+    def __init__ (self):
+        super().__init__()
+
 class IvyRadio ():
     def  __init__ (self):
         self.nom = 'MiniManche'
@@ -15,6 +25,7 @@ class IvyRadio ():
         self.commandeModeleNx = "APNxControl nx={}"
         self.commandeModeleNx = "APNzControl nz={}"
         self.commandeModelep = "APLatControl rollRate={}"
+        self.qtEmetteur = objetQt ()
 
         IvyBindMsg (self.onBoutonAPPush, self.btnPousse)
         IvyBindMsg (self.onRcvStateVector, self.vecteurDEtat)
@@ -36,25 +47,30 @@ class IvyRadio ():
     def onBoutonAPPush (self,sender):
         """Fonction appelée par un callback d'un message de l'interface.
         Broadcast la valeur allumée ou éteinte du pilote automatique."""
-        #Traitement
-        self.sendAPState()
+        self.qtEmetteur.BoutonPousseSignal.emit()
+
     def onRcvStateVector (self,sender,x,y,z,Vp,fpa,psi,phi):
         """Fonction appelée par un callback d'un message de l'interface.
         Les valeurs sont utilisées pour calculer les limites de commande."""
-        pass
+        self.qtEmetteur.VecteurDEtatSignal.emit((x,y,z,Vp,fpa,psi,phi))
+
     def onRcvAPCommand (self,sender,nx, nz, p):
         """Fonction appelée par une callback de message pilote automatique.
         Appelle l'envoie des valeurs approuvées par les limites de l'avion."""
-        pass
+        self.qtEmetteur.CommandeAPSignal.emit ((nx, nz, p))
+
         #Envoi de messages
     def sendSpeedCommand (self, Vc):
         """Envoie une commande de vitesse managée à l'auto pilote."""
         self.sendMessage
 
-    def sendAPState(self):
-        """Envoie l'état de l'auto pilote."""
-        état = getAPState ()
-        self.sendMessage(self.FCUAP.format(état))
+    def sendAPState(self,isOn):
+        """Envoie l'état de l'auto pilote. 
+        L'argument : isOn est un booléen qui donne l'état de l'AP1"""
+        if isOn :
+            self.sendMessage(self.FCUAP.format("on"))
+        else : 
+            self.sendMessage(self.FCUAP.format("off"))
 
     def sendAircraftCommand (self,nx,nz,p):
         """Envoie les commandes de vol au modèle d'avion."""
