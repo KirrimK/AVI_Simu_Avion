@@ -51,7 +51,7 @@ def vitesse_limite(self.alt,self.vitesse_lim):
 			vitesse_lim=250*KT2MS
 		if limite_alt[0]<self.alt<limite_alt[1]:
 			self.Mach=False
-			vitesse_lim=350*KTS2MS
+			vitesse_lim=350*KT2MS
 		if self.alt>limite_alt[1]:
 			self.Mach=True
 			#Mach maximal=0.82
@@ -72,7 +72,7 @@ def vitesse_limite(self.alt,self.vitesse_lim):
 	if self.config_physique==3:
 		self.Mach=False
 		vitesse_lim=185*KT2MS
-	if self.config_physique==FULL:
+	if self.config_physique==4:
 		self.Mach=False
 		vitesse_lim=177*KT2MS
 		
