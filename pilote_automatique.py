@@ -2,7 +2,7 @@ from ivy.std_api import *
 import time
 
 class IvyPA():
-    def __init__(self,vwind=0,dirwind=0,dm=0,cap=0,route=0,lateral_mode="Managed",vertical_mode="Managed",speed_mode="Managed",speed=0,mach=0,altitude=0,vertical_val=0,state_vector=(),target_X=0,target_Y=0,target_Z=0,target_khi=0):
+    def __init__(self,vwind=0,dirwind=0,dm=0,cap=0,route=0,lateral_mode="Managed",vertical_mode="Managed",speed_mode="Managed",speed=0,mach=0,altitude=0,vertical_val=0,state_vector=[],target_X=0,target_Y=0,target_Z=0,target_khi=0,vmin=0,vmax=0,phiLim=0,nxMin=0,nxMax=0,nzMin=0,nzMax=0,pLim=0):
         self.vwind = vwind
         self.dirwind = dirwind
         self.dm = dm
@@ -16,11 +16,18 @@ class IvyPA():
         self.target_X= target_X
         self.target_Y = target_Y
         self.target_Z = target_Z
-        self.taregt_khi = target_khi
+        self.target_khi = target_khi
         self.altitude = altitude
         self.vertical_val = vertical_val
         self.state_vector = state_vector
-
+        self.vmin = vmin
+        self.vamx = vmax
+        self.phiLim = phiLim
+        self.nxMin = nxMin
+        self.nxMax = nxMax
+        self.nzMin = nzMin
+        self.nzMax = nzMax
+        self.pLim = pLim
     def on_cx_proc(agent,connected):
         pass
 
@@ -35,11 +42,11 @@ class IvyPA():
 
     def on_msg_dm(self,agent,*data):
         self.dm = int(data[0])
-        print("mag_dec = ",self.dm,type(self.dm))
+        print("mag_dec = ",self.dm)
 
     def on_msg_state_vector(self,agent,*data):
-        self.state_vector = (int(x) for x in data)
-        print("state_vector = ",self.state_vector)
+        self.state_vector = [int(x) for x in list(data)]
+        print("StateVector=",self.state_vector)
 
     def on_msg_FCULateral(self,agent,*data):
         self.lateral_mode = data[0]
@@ -75,7 +82,17 @@ class IvyPA():
         self.target_Z=int(data[2])
         self.target_khi=int(data[3])
         print("Target (X,Y,Z,Khi)=",(self.target_X,self.target_Y,self.target_Z,self.target_khi))
-        
+    def on_msg_limites(self,agent,*data):
+        self.vmin=int(data[0])
+        self.vmax=int(data[1])
+        self.phiLim=int(data[2])
+        self.nxMin=int(data[3])
+        self.nxMax=int(data[4])
+        self.nzMin=int(data[5])
+        self.nzMax=int(data[6])
+        self.pLim=int(data[7])
+        print("Limites (vmin,vmax,phiLim,nxMin,nxMax,nzMin,nzMax,pLim)=",(self.vmin,self.vmax,self.phiLim,self.nxMin,self.nxMax,self.nzMin,self.nzMax,self.pLim))
+
 if __name__=="__main__":
 
     app_name="MyIvyApplication"
@@ -91,4 +108,5 @@ if __name__=="__main__":
     IvyBindMsg(Ivypa.on_msg_SpeedMach,'^SpeedMach Mode=(\S+) Val=(\S+)')
     IvyBindMsg(Ivypa.on_msg_FCUVertical,'^FCUVertical Altitude=(\S+) Mode=(\S+) Val=(\S+)')
     IvyBindMsg(Ivypa.on_msg_target,"^Target X=(\S+) Y=(\S+) Z=(\S+) Khi=(\S+)")
+    IvyBindMsg(Ivypa.on_msg_limites,"^MM Limites Vmin=(\S+) Vmax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)")
     IvyMainLoop()

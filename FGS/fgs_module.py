@@ -65,6 +65,7 @@ class FGS:
             - filename: string
         """
         self.dirto_on = False
+        self.waiting_dirto = False
         self.dirto_target_number = 0
         self.phi_max = 0 #radians
         self.flight_plan = load_flight_plan(filename)
@@ -132,14 +133,40 @@ class FGS:
             
             #Envoyer la prochaine target
             IvySendMsg(TARGET_MSG.format(self.flight_plan[self.current_target_on_plan]))
-        
+        if self.waiting_dirto:
+            pass
         #Sinon
         else:
             if self.targetmode == OVERFLY:
                 if (ex > 0):
-                    pass
                     #vérifier si distance inf à distmax
+                    if (distance < distance_max):
+                        #ok
+                        self.current_target_on_plan += 1
+                        new_tgt = self.flight_plan[self.current_target_on_plan]
+                        _, x_wpt, y_wpt, z_wpt, tgtmode = new_tgt.infos()
+                        contrainte = z_wpt
+                        if contrainte == -1:
+                            found_next = False
+                            for j in range(self.current_target_on_plan, len(self.flight_plan)):
+                                if self.flight_plan[j].infos()[3] != -1:
+                                    contrainte = self.flight_plan[j].infos()[3]
+                                    break
+                            if not found_next:
+                                contrainte = self.lastsenttarget[2]
+                        self.targetmode = tgtmode
+                        self.lastsenttarget = (x_wpt, y_wpt, contrainte, axe_next)
+                        IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
                         #séquencer, passer au suivant
+                    else:
+                        #nope, dirtorequest
+                        self.waiting_dirto = True
+                        route_actuelle = psi# + derive à calculer
+                        IvySendMsg("DirtoRequest")
+                        self.lastsenttarget = (x, y, z, route_actuelle)
+                        IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
+                    
+                        
                 else:
                     pass
                     #pas encore
