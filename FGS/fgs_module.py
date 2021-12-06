@@ -67,7 +67,7 @@ class FGS:
         self.flight_plan = load_flight_plan(filename)
         self.current_target_on_plan = 0
         self.lastsenttarget = (0, 0, 0, 0)
-        self.targetmode = 
+        self.targetmode = FLYBY
         self.vwind = vwind 
         self.dirwind = dirwind
         self.dm = MagneticDeclination
