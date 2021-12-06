@@ -91,7 +91,7 @@ class FGS:
             #Séquençage
             
             #Envoyer la prochaine target
-            IvySendMsg(TARGET_MSG.format())
+            IvySendMsg(TARGET_MSG.format(self.flight_plan[self.current_target_on_plan]))
         
         #Sinon
         else:
