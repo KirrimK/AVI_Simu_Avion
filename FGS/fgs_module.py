@@ -131,7 +131,7 @@ class FGS:
                 else:
                     pass
                     #pas encore
-            if self.targetmode == OVERFLY:
+            else:
                 if (ex + seuil_ex > 0):
                     pass
                     #séquencer, passer au suivant
@@ -139,19 +139,6 @@ class FGS:
                     pass
                     #pas encore
 
-
-
-
-
-                #envoyer dirtorequest
-                IvySendMsg("DirtoRequest")
-
-                #continuer à envoyer aller tout droit
-
-            #sinon
-            else:
-                #envoyer la même requête qui a été générée lors de la réception du dirto
-                IvySendMsg()
 
 
     def on_dirto(self, sender, *data):
