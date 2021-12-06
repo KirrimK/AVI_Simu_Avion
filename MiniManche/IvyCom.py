@@ -19,7 +19,7 @@ class IvyRadio ():
         self.vecteurDEtat = "^StateVector x=(.+) y=(.+) z=(.+) Vp=(.+) fpa=(.+) psi=(.+) phi=(.+)$"
         self.commandeAutoPilote = "^AutoPilot nx=(.+) nz=(.+) rollRate=(.+)$"
         #Messages à envoyer : 
-        self.infoLimites = "MM Limites vMin={} vMax={} phiLim={} nxMin={} nxMax={} nzMin={} nzMax={} pLim={}"
+        self.infoLimites = "MM Limites vMax={} phiLim={} nxMin={} nxMax={} nzMin={} nzMax={} pLim={}"
         self.commandeVitesse = "MM Vc={}"
         self.FCUAP = "FCUAP {}"
         self.commandeModeleNx = "APNxControl nx={}"
