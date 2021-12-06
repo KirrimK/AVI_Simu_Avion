@@ -30,10 +30,9 @@ class TextPrint(object):
 
 
 class MancheRadio():
-    def _init_(self, window):
+    def __init__(self, window):
         self.window = window
         self.done = False
-        self.VecteurDEtatSignal.connect(self.onSignalRadio)
 
 
     def runPygame(self):
