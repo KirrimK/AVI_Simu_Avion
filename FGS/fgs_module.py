@@ -8,7 +8,9 @@ DIRTO_REGEX = "DIRTO Wpt=(\S+)"
 TIMESTART_REGEX = "Time t=1.0"
 LIMITES_REGEX = "MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)"
 
-InitStateVector=[0,0,0,110,0,0,0] #la vitesse de décollage est de 110 m/s
+KTS2MS = 0.5144447
+
+InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 0, 0] #la vitesse de décollage est de 110 m/s soit 
 
 class Waypoint:
     """
