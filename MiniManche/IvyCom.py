@@ -3,7 +3,7 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget
 
 class objetQt (QWidget):
-    BoutonPousseSignal = pyqtSignal()
+    BoutonPousseSignal = pyqtSignal(bool)
     VecteurDEtatSignal = pyqtSignal (tuple)
     CommandeAPSignal = pyqtSignal (tuple)
     def __init__ (self):
@@ -44,10 +44,9 @@ class IvyRadio ():
         IvySendMsg(message)
 
         #Réactions aux messages
-    def onBoutonAPPush (self,sender):
-        """Fonction appelée par un callback d'un message de l'interface.
-        Broadcast la valeur allumée ou éteinte du pilote automatique."""
-        self.qtEmetteur.BoutonPousseSignal.emit()
+    def onBoutonAPPush (self,sender,argManche = False):
+        """Fonction appelée par un callback d'un message de l'interface ou par le manche."""
+        self.qtEmetteur.BoutonPousseSignal.emit(argManche)
 
     def onRcvStateVector (self,sender,x,y,z,Vp,fpa,psi,phi):
         """Fonction appelée par un callback d'un message de l'interface.
