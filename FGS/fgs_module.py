@@ -141,7 +141,6 @@ class FGS:
             - WindComponent
             - MagneticDeclination
         """
-        
         IvySendMsg("StateVector x={} y={} z={} Vp={} fpa={} psi={} phi={}".format(*InitStateVector))
         IvySendMsg("WindComponent VWind={} dirWind={}".format(self.vwind,self.dirwind))
         IvySendMsg("MagneticDeclination MagneticDeclination={}".format(self.dm))
