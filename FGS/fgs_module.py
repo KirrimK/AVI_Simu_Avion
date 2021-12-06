@@ -110,6 +110,7 @@ class FGS:
             delta_khi = axe_next - axe_actuel
             seuil_ex = vp**2/(GRAV*math.tan(self.phi_max))*math.tan(delta_khi/2)
 
+        #si en mode dirto
         if self.dirto_on:
             #Séquençage
             
