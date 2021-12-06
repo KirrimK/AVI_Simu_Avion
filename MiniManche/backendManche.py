@@ -128,10 +128,10 @@ class MancheRadio():
                 textPrint.tprint(screen, "Number of axes: {}".format(axes))
                 textPrint.indent()
 
-                axis0 = joystick.get_axis(0)
-                textPrint.tprint(screen, "Axis 0 value: {:>6.3f}".format(axis0))
-                axis1 = joystick.get_axis(1)
-                textPrint.tprint(screen, "Axis 1 value: {:>6.3f}".format(axis1))
+                self.window.pBrut = joystick.get_axis(0)
+                textPrint.tprint(screen, "Axis 0 value: {:>6.3f}".format(joystick.get_axis(0)))
+                self.window.nzBrut = joystick.get_axis(1)
+                textPrint.tprint(screen, "Axis 1 value: {:>6.3f}".format(joystick.get_axis(1)))
                 textPrint.unindent()
 
                 buttons = joystick.get_numbuttons()
