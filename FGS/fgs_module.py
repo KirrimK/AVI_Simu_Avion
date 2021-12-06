@@ -86,12 +86,12 @@ class FGS:
         """
         pass
         #mettre à jour les infos connues sur l'avion (unpack data)
-        
+        self.state_vector = data.copy()
         if self.dirto_on:
             #Séquençage
             
             #Envoyer la prochaine target
-            IvySendMsg(TARGET_MSG.format())
+            IvySendMsg(TARGET_MSG.format(self.flight_plan[self.current_target_on_plan]))
         
         #Sinon
         else:
