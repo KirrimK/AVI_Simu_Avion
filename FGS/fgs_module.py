@@ -11,6 +11,8 @@ DIRTO_REGEX = "DIRTO Wpt=(\S+)"
 TIMESTART_REGEX = "Time t=1.0"
 LIMITES_REGEX = "MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)"
 
+TARGET_MSG = "Target X={} Y={} Z={} Khi={}"
+
 KTS2MS = 0.5144447
 DEG2RAD = 0.01745329
 
@@ -127,7 +129,7 @@ class FGS:
                 #activer le mode dirto
                 self.dirto_on = True
                 #envoyer le 1er msg
-                IvySendMsg(self.lastsenttarget)
+                IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
                 break
         
 
