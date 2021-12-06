@@ -91,7 +91,7 @@ class FGS:
             #Séquençage
             
             #Envoyer la prochaine target
-            IvySendMsg("Target X={} Y={} Z={} Khi={}".format(self.flight_plan[self.current_target_on_plan]))
+            IvySendMsg(TARGET_MSG.format(self.flight_plan[self.current_target_on_plan]))
         
         #Sinon
         else:
@@ -122,18 +122,19 @@ class FGS:
         for i in range(self.current_target_on_plan, len(self.flight_plan)):
             if self.flight_plan[i].name() == dirto_wpt:
                 #get les infos du Wpt
-                _, x_wpt, y_wpt, z_wpt, wpt_mode = self.flight_plan[i].infos()
+                _, x_wpt, y_wpt, z_wpt, _ = self.flight_plan[i].infos()
                 #calculer la direction à mettre
                 route = math.atan2(y_wpt-self.state_vector[1], x_wpt-self.state_vector[0])
                 #trouver la prochaine contrainte d'altitude, si il n'y en a pas, garder la plus récente
-                contrainte = -1
-                found_next = False
-                for j in range(i, len(self.flight_plan)):
-                    if self.flight_plan[j].infos()[3] != -1:
-                        contrainte = self.flight_plan[j].infos()[3]
-                        break
-                if not found_next:
-                    contrainte = self.lastsenttarget[2]
+                contrainte = z_wpt
+                if contrainte == -1:
+                    found_next = False
+                    for j in range(i, len(self.flight_plan)):
+                        if self.flight_plan[j].infos()[3] != -1:
+                            contrainte = self.flight_plan[j].infos()[3]
+                            break
+                    if not found_next:
+                        contrainte = self.lastsenttarget[2]
                 #sauvegarder le message à envoyer
                 self.lastsenttarget = (x_wpt, y_wpt, contrainte, route)
                 self.targetmode = FLYBY
