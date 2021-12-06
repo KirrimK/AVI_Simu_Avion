@@ -53,7 +53,7 @@ class FGS:
         self.flight_plan = load_flight_plan(filename)
         self.current_target_on_plan = 0
         self.lastsenttarget = ""
-        self.wind = WindComponent
+        self.wind = WindComponent # c'est une liste comprenant la vitesse du vent et son orientation (dans cet ordre)
         self.dm = MagneticDeclination
         self.state_vector = InitStateVector.copy()
         IvyBindMsg(self.on_state_vector, STATEVEC_REGEX)
@@ -100,7 +100,13 @@ class FGS:
             - WindComponent
             - MagneticDeclination
         """
-        pass        
+        strInitStateVector = ",".join(InitStateVector)
+        strWindComponent = ",".join(self.wind)
+        strMagneticDeclination = str(self.dm)
+        IvySendMsg("strInitStateVector")
+        IvySendMsg("strWindComponent")
+        IvySendMsg("strMagneticDeclination")
+
 
     def on_limit_msg(self, sender, *data):
         """Retourne une liste de Waypoints (un PDV) depuis un fichier
