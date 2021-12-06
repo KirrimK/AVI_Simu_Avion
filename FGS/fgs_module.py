@@ -128,6 +128,7 @@ class FGS:
                     contrainte = self.lastsenttarget[2]
                 #sauvegarder le message à envoyer
                 self.lastsenttarget = (x_wpt, y_wpt, contrainte, route)
+                self.targetmode = FLYBY
                 #mettre à jour le numéro de la target en cours
                 self.current_target_on_plan = i
                 #activer le mode dirto
