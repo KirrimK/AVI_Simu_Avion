@@ -2,6 +2,7 @@
 
 from ivy.std_api import *
 import time
+import math
 
 STATEVEC_REGEX = "StateVector x=(\S+) y=(\S+) z=(\S+) Vp=(\S+) fpa=(\S+) psi=(\S+) phi=(\S+)"
 #WINDCOMP_REGEX = "WindComponent VWind=(\S+) dirWind=(\S+)"
@@ -9,6 +10,11 @@ STATEVEC_REGEX = "StateVector x=(\S+) y=(\S+) z=(\S+) Vp=(\S+) fpa=(\S+) psi=(\S
 DIRTO_REGEX = "DIRTO Wpt=(\S+)"
 TIMESTART_REGEX = "Time t=1.0"
 LIMITES_REGEX = "MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)"
+
+TARGET_MSG = "Target X={} Y={} Z={} Khi={}"
+
+FLYBY = "flyBy"
+OVERFLY = "overFly"
 
 KTS2MS = 0.5144447
 DEG2RAD = 0.01745329
@@ -60,7 +66,8 @@ class FGS:
         self.phi_max = 0 #radians
         self.flight_plan = load_flight_plan(filename)
         self.current_target_on_plan = 0
-        self.lastsenttarget = ""
+        self.lastsenttarget = (0, 0, 0, 0)
+        self.targetmode = FLYBY
         self.vwind = vwind 
         self.dirwind = dirwind
         self.dm = MagneticDeclination
@@ -79,17 +86,27 @@ class FGS:
         """
         pass
         #mettre à jour les infos connues sur l'avion (unpack data)
-
-        #si mode dirto pas enclenché:
-            #séquençage
-
-            #envoyer la prochaine target
-        #sinon
+        
+        if self.dirto_on:
+            #Séquençage
+            
+            #Envoyer la prochaine target
+            IvySendMsg("Waypoint".format())
+        
+        #Sinon
+        else:
             #si wpt a été dépassé (overFly)
+            if Waypoint.mode == "overFly":
                 #envoyer dirtorequest
+                IvySendMsg("DirtoRequest")
+
                 #continuer à envoyer la même target tant que pas de nv dirto
+
             #sinon
-                #envoyer la même requête qui a été générée lors de la reception du dirto
+            else:
+                #envoyer la même requête qui a été générée lors de la réception du dirto
+                IvySendMsg()
+
 
     def on_dirto(self, sender, *data):
         """Callback de DIRTO
@@ -99,11 +116,34 @@ class FGS:
         """
         #pas de dirto sur un pt du pdv déjà séquencé
         #le dirto est un raccourci dans le PDV
+        #dirto flyby par défaut
         (dirto_wpt) = data
-        #chercher le WPT dans la liste des WPTs, via recherche linéaire
+        #chercher le WPT dans la liste des WPTs non séquencés, via recherche linéaire
         for i in range(self.current_target_on_plan, len(self.flight_plan)):
             if self.flight_plan[i].name() == dirto_wpt:
-                pass
+                #get les infos du Wpt
+                _, x_wpt, y_wpt, z_wpt, wpt_mode = self.flight_plan[i].infos()
+                #calculer la direction à mettre
+                route = math.atan2(y_wpt-self.state_vector[1], x_wpt-self.state_vector[0])
+                #trouver la prochaine contrainte d'altitude, si il n'y en a pas, garder la plus récente
+                contrainte = -1
+                found_next = False
+                for j in range(i, len(self.flight_plan)):
+                    if self.flight_plan[j].infos()[3] != -1:
+                        contrainte = self.flight_plan[j].infos()[3]
+                        break
+                if not found_next:
+                    contrainte = self.lastsenttarget[2]
+                #sauvegarder le message à envoyer
+                self.lastsenttarget = (x_wpt, y_wpt, contrainte, route)
+                self.targetmode = FLYBY
+                #mettre à jour le numéro de la target en cours
+                self.current_target_on_plan = i
+                #activer le mode dirto
+                self.dirto_on = True
+                #envoyer le 1er msg
+                IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
+                break
         
 
     def on_time_start(self, sender, *data):
@@ -114,7 +154,6 @@ class FGS:
             - WindComponent
             - MagneticDeclination
         """
-        
         IvySendMsg("StateVector x={} y={} z={} Vp={} fpa={} psi={} phi={}".format(*InitStateVector))
         IvySendMsg("WindComponent VWind={} dirWind={}".format(self.vwind,self.dirwind))
         IvySendMsg("MagneticDeclination MagneticDeclination={}".format(self.dm))
