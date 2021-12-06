@@ -10,5 +10,7 @@ class Window(QMainWindow):
         self.setWindowTitle("Contrôles des sufarces de vol")
         self.radio = 
         self.setupSliders ()
+        self.pBrut = 0
+        self.nzBrut = 0
     def setupSliders (self):
         pass
