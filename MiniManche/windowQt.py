@@ -15,6 +15,7 @@ class Window(QWidget):
         self.manche.runPygame()
         self.pBrut = 0
         self.nzBrut = 0
+        self.isAPOn = True
 
     def setupSliders (self):
         layout = QHBoxLayout()
@@ -36,7 +37,14 @@ class Window(QWidget):
         self.sliderFlaps.show ()
 
     def onButtonPushSignal (self,boolManche):
-        pass
+        if boolManche:
+            self.isAPOn = False
+        elif (not self.isAPOn) and True:
+            self.isAPOn = True
+        else :
+            self.isAPOn = False
+        self.radio.sendAPState(self.isAPOn)
+        
     def onVecteurDEtatSignal (self,argTuple):
         pass
     def onCommandeAPSignal (self,argTuple):
