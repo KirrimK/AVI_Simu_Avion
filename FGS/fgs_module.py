@@ -13,6 +13,9 @@ LIMITES_REGEX = "MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax
 
 TARGET_MSG = "Target X={} Y={} Z={} Khi={}"
 
+FLYBY = "flyBy"
+OVERFLY = "overFly"
+
 KTS2MS = 0.5144447
 DEG2RAD = 0.01745329
 
@@ -64,6 +67,7 @@ class FGS:
         self.flight_plan = load_flight_plan(filename)
         self.current_target_on_plan = 0
         self.lastsenttarget = (0, 0, 0, 0)
+        self.targetmode = 
         self.vwind = vwind 
         self.dirwind = dirwind
         self.dm = MagneticDeclination
