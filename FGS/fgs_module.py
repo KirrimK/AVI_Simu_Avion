@@ -19,6 +19,8 @@ OVERFLY = "overFly"
 KTS2MS = 0.5144447
 DEG2RAD = 0.01745329
 
+NM2M = 1852
+
 InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 0, 0] #la vitesse de décollage est de 110 m/s
 
 
@@ -87,6 +89,8 @@ class FGS:
         pass
         #mettre à jour les infos connues sur l'avion (unpack data)
         self.state_vector = data.copy()
+        #
+
         if self.dirto_on:
             #Séquençage
             
