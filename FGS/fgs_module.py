@@ -1,6 +1,5 @@
 # FGS_module
 
-from os import fpathconf
 from ivy.std_api import *
 import time
 import math
