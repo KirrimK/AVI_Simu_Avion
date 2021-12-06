@@ -94,12 +94,12 @@ class FGS:
             - WindComponent
             - MagneticDeclination
         """
-        strInitStateVector = ",".join(InitStateVector)
-        strWindComponent = ",".join(self.wind)
-        strMagneticDeclination = str(self.dm)
-        IvySendMsg("strInitStateVector")
-        IvySendMsg("strWindComponent")
-        IvySendMsg("strMagneticDeclination")
+        strInitStateVector = ",".join(InitStateVector) #on passe la liste en chaîne de caractère
+        strWindComponent = ",".join(self.wind) #idem
+        strMagneticDeclination = str(self.dm) #idem même si ce n'est pas une liste
+        IvySendMsg("StateVector x={} y={} z={} Vp={} fpa={} psi={} phi={}".format(0,0,0,110,0,0,0))
+        IvySendMsg("")
+        IvySendMsg("")
 
 
     def on_limit_msg(self, sender, *data):
