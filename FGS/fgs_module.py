@@ -79,19 +79,27 @@ class FGS:
         """
         pass
         #mettre à jour les infos connues sur l'avion (unpack data)
-        IvySendMsg("State Vector x={} y={} z={} Vp={} fpa={} psi={} phi={}".format(*data))
-
         
-        #si mode dirto pas enclenché:
-            #séquençage
-
-            #envoyer la prochaine target
-        #sinon
+        if self.dirto_on:
+            #Séquençage
+            
+            #Envoyer la prochaine target
+            IvySendMsg("Waypoint".format())
+        
+        #Sinon
+        else:
             #si wpt a été dépassé (overFly)
+            if Waypoint.mode == "overFly":
                 #envoyer dirtorequest
+                IvySendMsg("DirtoRequest")
+
                 #continuer à envoyer la même target tant que pas de nv dirto
+
             #sinon
-                #envoyer la même requête qui a été générée lors de la reception du dirto
+            else:
+                #envoyer la même requête qui a été générée lors de la réception du dirto
+                IvySendMsg()
+
 
     def on_dirto(self, sender, *data):
         """Callback de DIRTO
