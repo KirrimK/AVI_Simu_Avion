@@ -8,7 +8,7 @@ class Window(QMainWindow):
         super().__init__()
         self.resize(1200, 600)
         self.setWindowTitle("Contrôles des sufarces de vol")
-        self.radio = 
+        self.radio = IvyRadio()
         self.manche = MancheRadio(self)
         self.setupSliders ()
         self.pBrut = 0
