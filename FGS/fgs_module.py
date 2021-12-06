@@ -2,6 +2,7 @@
 
 from ivy.std_api import *
 import time
+import math
 
 STATEVEC_REGEX = "StateVector x=(\S+) y=(\S+) z=(\S+) Vp=(\S+) fpa=(\S+) psi=(\S+) phi=(\S+)"
 #WINDCOMP_REGEX = "WindComponent VWind=(\S+) dirWind=(\S+)"
@@ -101,11 +102,29 @@ class FGS:
         """
         #pas de dirto sur un pt du pdv déjà séquencé
         #le dirto est un raccourci dans le PDV
+        #dirto flyby par défaut
         (dirto_wpt) = data
-        #chercher le WPT dans la liste des WPTs, via recherche linéaire
+        #chercher le WPT dans la liste des WPTs non séquencés, via recherche linéaire
         for i in range(self.current_target_on_plan, len(self.flight_plan)):
             if self.flight_plan[i].name() == dirto_wpt:
-                pass
+                #get les infos du Wpt
+                _, x_wpt, y_wpt, z_wpt, wpt_mode = self.flight_plan[i].infos()
+                #calculer la direction à mettre
+                route = math.atan2(y_wpt-self.state_vector[1], x_wpt-self.state_vector[0])
+                #trouver la prochaine contrainte d'altitude
+                contrainte = -1
+                for j in range(i, len(self.flight_plan)):
+                    if self.flight_plan[j].infos()[3] != -1:
+                        contrainte = self.flight_plan[j].infos()[3]
+                #sauvegarder le message à envoyer
+                self.lastsenttarget = "Target X={} Y={} Z={} Khi={}".format(x_wpt, y_wpt, contrainte, route)
+                #mettre à jour le numéro de la target en cours
+                self.current_target_on_plan = i
+                #activer le mode dirto
+                self.dirto_on = True
+                #envoyer le 1er msg
+                IvySendMsg(self.lastsenttarget)
+                break
         
 
     def on_time_start(self, sender, *data):
