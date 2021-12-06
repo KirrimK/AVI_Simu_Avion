@@ -78,5 +78,5 @@ class IvyRadio ():
         self.sendMessage (self.commandeModeleNz.format(nz))
         self.sendMessage (self.commandeModelep.format (p))
 
-    def sendLimitsInfo (self, vMin, vMax, phiLim, nxMin, nxMax, nzMin, nzMax, pLim):
-        self.sendMessage(self.infoLimites.format(vMin, vMax, phiLim, nxMin, nxMax, nzMin, nzMax, pLim))
+    def sendLimitsInfo (self, vMax, phiLim, nxMin, nxMax, nzMin, nzMax, pLim):
+        self.sendMessage(self.infoLimites.format(vMax, phiLim, nxMin, nxMax, nzMin, nzMax, pLim))

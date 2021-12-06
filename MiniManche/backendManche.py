@@ -9,3 +9,9 @@ class WidgetBackend (QWidget):
     Button0Signal = pyqtSignal (float) # gachette arrière -> pas utilisé
     Button1Signal = pyqtSignal (float) # gros bouton de gauche -> pas utilisé
     Button2Signal = pyqtSignal (float) # gros bouton de droite -> pas utilisé
+    def __init__ (self):
+        super().__init__()
+
+
+class MancheRadio():
+    def _init_(self):

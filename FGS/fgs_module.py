@@ -11,6 +11,7 @@ TIMESTART_REGEX = "Time t=1.0"
 LIMITES_REGEX = "MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)"
 
 KTS2MS = 0.5144447
+DEG2RAD = 0.01745329
 
 InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 0, 0] #la vitesse de décollage est de 110 m/s
 
@@ -52,6 +53,7 @@ class FGS:
             - filename: string
         """
         self.dirto_on = False
+        self.dirto_target_number = 0
         self.phi_max = 0 #radians
         self.flight_plan = load_flight_plan(filename)
         self.current_target_on_plan = 0
@@ -92,7 +94,9 @@ class FGS:
         Sortie Ivy: 1 message sur Ivy
             - Target
         """
-        pass
+        (dirto_wpt) = data
+        #chercher le WPT dans la liste des WPTs.
+
         #pas de dirto sur un pt du pdv déjà séquencé
         #le dirto est un raccourci dans le PDV
 
