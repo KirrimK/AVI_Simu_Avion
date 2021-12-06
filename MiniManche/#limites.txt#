@@ -1,0 +1,41 @@
+-20,20 Limite de pente en degrès -20<gamma<20
+-30,30 Limite angle de roulis en degrès  -30<phi<30
+
+Flight maneuvring load acceleration limits = limite de nz
+	clean configuration : -1 to 2,5 g -> ça veut dire qu'on a pas les trains 
+	slats and flaps extended : 0 to 2 g
+	slats exetended and flaps retracted : 0 to 2 g
+	#prenre le plus limitants avec le train sorti 
+	
+Limitation en nx -> difficile à faire selon le prof : on va faire des tests : entre -0,5 et 0,5 ou entre -1 et 1 et voir ensuite quelle est la meilleure limitation 
+
+En dessous du FL100 -> on doit toujours être en dessous de 250kts
+
+En dessous de 24600 ft -> VM0 obligatoirement en dessous de 350kts
+
+Au dessus de 24600 ft -> MMO (passage en Mach) obligatoirement en dessous de 0.82M
+
+Proposition : faire avec 320 kts et 0.78M pour être sûr de pouvoir faire des manoeuvres 
+
+Idées pour gérer les vitesses maximales en fonction de la configuration avion : au début on prendra les vitesses pour la position 1 du takeoff cad la position 1+F, (ensuite on va ou pas dans les positions 2 et 3), une fois qu'on est passé par la position 0 on sait que l'on sera sur de l'attente ou sur de l'atterissage pour les positions supérieures -> on a ça juste pour le holding donc on pourrait s'en sortir
+
+Vitesses de décrochage = stalling speeds : on s'y intèresse pas pour l'instant, on suppose que notre avion ne décrochera pas 
+
+!!!!!! Les limites du miniManche et du PA sont pas les mêmes !!!! 
+Envoyer tous le temps leurs limites à tous les deux pour être bien 
+!! si on est dans une certaine plage de limite on pourra peut être pas enclencher le PA et il va falloir faire attention à ça aussi !!!
+
+Modèle avion pas assez précis, on va par exemple pouvoir confondre l'assiette et la pente (cf Thierry Miquel)
+
+idée pour gérer le système des limites : créer une classe avion qui aura comme attributs la configuration physique de l'avion, l'altitude de l'avion et la vitesse que l'on calculera 
+
+Mettre qui fait quoi dans le rapport
+
+Pas de limite d'altitude pour la mise en route de l'AP parce que l'on va décoller avec l'AP mais normalement il y en aura une 
+
+Limite d'altitude pour les volets : FL200
+
+Pour les limitations de roulis : sources = l'avionnaire -> c'est cohérent avec ce que l'on a sur notre petit joystick du coup c'est encourageant 
+
+
+Idées de test pour mon fichier de limites = créer des avions avec la classe avion et regarder si on a les bonnnes plages de limitations pour voir si les fonctions ne buggent pas et renvoient ce que l'on veut 
