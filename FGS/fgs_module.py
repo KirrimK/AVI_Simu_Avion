@@ -61,7 +61,7 @@ class FGS:
         self.phi_max = 0 #radians
         self.flight_plan = load_flight_plan(filename)
         self.current_target_on_plan = 0
-        self.lastsenttarget = ""
+        self.lastsenttarget = (0, 0, 0, 0)
         self.vwind = vwind 
         self.dirwind = dirwind
         self.dm = MagneticDeclination
@@ -111,13 +111,17 @@ class FGS:
                 _, x_wpt, y_wpt, z_wpt, wpt_mode = self.flight_plan[i].infos()
                 #calculer la direction à mettre
                 route = math.atan2(y_wpt-self.state_vector[1], x_wpt-self.state_vector[0])
-                #trouver la prochaine contrainte d'altitude
+                #trouver la prochaine contrainte d'altitude, si il n'y en a pas, garder la plus récente
                 contrainte = -1
+                found_next = False
                 for j in range(i, len(self.flight_plan)):
                     if self.flight_plan[j].infos()[3] != -1:
                         contrainte = self.flight_plan[j].infos()[3]
+                        break
+                if not found_next:
+                    contrainte = self.lastsenttarget[2]
                 #sauvegarder le message à envoyer
-                self.lastsenttarget = "Target X={} Y={} Z={} Khi={}".format(x_wpt, y_wpt, contrainte, route)
+                self.lastsenttarget = (x_wpt, y_wpt, contrainte, route)
                 #mettre à jour le numéro de la target en cours
                 self.current_target_on_plan = i
                 #activer le mode dirto
