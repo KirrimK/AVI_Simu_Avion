@@ -43,6 +43,7 @@ class WidgetBackend (QWidget):
 class MancheRadio():
     def _init_(self, window):
         self.window = window
+        self.done = False
         self.VecteurDEtatSignal.connect(self.onSignalRadio)
         self.qtEmetteur = WidgetBackend ()
 
@@ -55,9 +56,6 @@ class MancheRadio():
 
         pygame.display.set_caption("Manche")
 
-        # Boucle tant que la fenetre n'est pas fermée.
-        done = False
-
         # Permet de savoir la vitesse de mise à jour des images de la fenetre.
         clock = pygame.time.Clock()
 
@@ -68,7 +66,7 @@ class MancheRadio():
         textPrint = TextPrint()
 
         # -------- boucle principale -----------
-        while not done:
+        while not self.done:
             #
             # EVENT PROCESSING STEP
             #
@@ -76,7 +74,7 @@ class MancheRadio():
             # JOYBUTTONUP, JOYHATMOTION
             for event in pygame.event.get(): # User did something.
                 if event.type == pygame.QUIT: # If user clicked close.
-                    done = True # Flag that we are done so we exit this loop.
+                   self.done = True # Flag that we are done so we exit this loop.
                 elif event.type == pygame.JOYBUTTONDOWN:
                     print("Joystick button pressed.")
                 elif event.type == pygame.JOYBUTTONUP:
