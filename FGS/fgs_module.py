@@ -5,8 +5,8 @@ import time
 import math
 
 STATEVEC_REGEX = "StateVector x=(\S+) y=(\S+) z=(\S+) Vp=(\S+) fpa=(\S+) psi=(\S+) phi=(\S+)"
-#WINDCOMP_REGEX = "WindComponent VWind=(\S+) dirWind=(\S+)"
-#DM_REGEX = "MagneticDeclination MagneticDeclination=(\S+)"
+WINDCOMP_REGEX = "WindComponent VWind={} dirWind={}"
+DM_REGEX = "MagneticDeclination MagneticDeclination={}"
 DIRTO_REGEX = "DIRTO Wpt=(\S+)"
 TIMESTART_REGEX = "Time t=1.0"
 LIMITES_REGEX = "MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)"
