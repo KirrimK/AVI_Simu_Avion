@@ -86,7 +86,7 @@ class FGS:
         """
         pass
         #mettre à jour les infos connues sur l'avion (unpack data)
-        
+        self.state_vector = data.copy()
         if self.dirto_on:
             #Séquençage
             
