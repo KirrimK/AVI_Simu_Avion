@@ -4,13 +4,16 @@ from ivy.std_api import *
 import time
 
 STATEVEC_REGEX = "StateVector x=(\S+) y=(\S+) z=(\S+) Vp=(\S+) fpa=(\S+) psi=(\S+) phi=(\S+)"
+#WINDCOMP_REGEX = "WindComponent VWind=(\S+) dirWind=(\S+)"
+#DM_REGEX = "MagneticDeclination MagneticDeclination=(\S+)"
 DIRTO_REGEX = "DIRTO Wpt=(\S+)"
 TIMESTART_REGEX = "Time t=1.0"
 LIMITES_REGEX = "MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)"
 
 KTS2MS = 0.5144447
 
-InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 0, 0] #la vitesse de décollage est de 110 m/s soit 
+InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 0, 0] #la vitesse de décollage est de 110 m/s
+
 
 class Waypoint:
     """
@@ -43,7 +46,7 @@ class FGS:
     L'objet contenant toutes les fonctions et variables du FGS
     """
 
-    def __init__(self, filename, WindComponent, MagneticDeclination):
+    def __init__(self, filename, vwind, dirwind, MagneticDeclination):
         """Constructeur du FGS
         Arguments:
             - filename: string
@@ -53,7 +56,8 @@ class FGS:
         self.flight_plan = load_flight_plan(filename)
         self.current_target_on_plan = 0
         self.lastsenttarget = ""
-        self.wind = WindComponent # c'est une liste comprenant la vitesse du vent et son orientation (dans cet ordre)
+        self.vwind = vwind 
+        self.dirwind = dirwind
         self.dm = MagneticDeclination
         self.state_vector = InitStateVector.copy()
         IvyBindMsg(self.on_state_vector, STATEVEC_REGEX)
@@ -100,12 +104,10 @@ class FGS:
             - WindComponent
             - MagneticDeclination
         """
-        strInitStateVector = ",".join(InitStateVector) #on passe la liste en chaîne de caractère
-        strWindComponent = ",".join(self.wind) #idem
-        strMagneticDeclination = str(self.dm) #idem même si ce n'est pas une liste
-        IvySendMsg("StateVector x={} y={} z={} Vp={} fpa={} psi={} phi={}".format(0,0,0,110,0,0,0))
-        IvySendMsg("")
-        IvySendMsg("")
+        
+        IvySendMsg("StateVector x={} y={} z={} Vp={} fpa={} psi={} phi={}".format(*InitStateVector))
+        IvySendMsg("WindComponent VWind={} dirWind={}".format(self.vwind,self.dirwind))
+        IvySendMsg("MagneticDeclination MagneticDeclination={}".format(self.dm))
 
 
     def on_limit_msg(self, sender, *data):
