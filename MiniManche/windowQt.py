@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QSlider
-from PyQt5.QtCore import pyqtSignal
-import PyQt5 as Qt
+from PyQt5.QtCore import pyqtSignal, Qt
 from IvyCom import IvyRadio
 from backendManche import MancheRadio
 
