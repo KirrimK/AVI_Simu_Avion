@@ -80,7 +80,9 @@ class FGS:
         """
         pass
         #mettre à jour les infos connues sur l'avion (unpack data)
+        IvySendMsg("State Vector x={} y={} z={} Vp={} fpa={} psi={} phi={}".format(*data))
 
+        
         #si mode dirto pas enclenché:
             #séquençage
 
