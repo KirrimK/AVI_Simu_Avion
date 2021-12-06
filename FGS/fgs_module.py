@@ -96,7 +96,7 @@ class FGS:
         #Sinon
         else:
             #si wpt a été dépassé (overFly)
-            if Waypoint.mode == "overFly":
+            if self.targetmode == OVERFLY:
                 #envoyer dirtorequest
                 IvySendMsg("DirtoRequest")
 
