@@ -55,6 +55,7 @@ class FGS:
         self.lastsenttarget = ""
         self.wind = WindComponent
         self.dm = MagneticDeclination
+        self.state_vector = InitStateVector.copy()
         IvyBindMsg(self.on_state_vector, STATEVEC_REGEX)
         IvyBindMsg(self.on_dirto, DIRTO_REGEX)
         IvyBindMsg(self.on_time_start, TIMESTART_REGEX)
@@ -69,6 +70,7 @@ class FGS:
         """
         pass
         #mettre à jour les infos connues sur l'avion (unpack data)
+
         #si mode dirto pas enclenché:
             #séquençage
 
@@ -87,6 +89,8 @@ class FGS:
             - Target
         """
         pass
+        #pas de dirto sur un pt du pdv déjà séquencé
+        #le dirto est un raccourci dans le PDV
 
     def on_time_start(self, sender, *data):
         """Callback de Time t=0.0
