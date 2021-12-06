@@ -18,14 +18,17 @@ class Waypoint:
     Objet contenant les informations d'un Waypoint
     """
     def __init__(self, name, x, y, z, mode):
-        self.name = name #string
+        self.nom = name #string
         self.x = x #float
         self.y = y #float
         self.z = z #float
         self.mode = mode #string: "overFly" | "flyBy"
 
+    def name(self):
+        return self.nom
+
     def infos(self):
-        return (self.name, self.x, self.y, self.z, self.mode)
+        return (self.nom, self.x, self.y, self.z, self.mode)
 
 def load_flight_plan(filename):
     """Retourne une liste de Waypoints (un PDV) depuis un fichier
@@ -90,11 +93,14 @@ class FGS:
         Sortie Ivy: 1 message sur Ivy
             - Target
         """
-        (dirto_wpt) = data
-        #chercher le WPT dans la liste des WPTs.
-
         #pas de dirto sur un pt du pdv déjà séquencé
         #le dirto est un raccourci dans le PDV
+        (dirto_wpt) = data
+        #chercher le WPT dans la liste des WPTs, via recherche linéaire
+        for i in range(self.current_target_on_plan, len(self.flight_plan)):
+            if self.flight_plan[i].name() == dirto_wpt:
+                pass
+        
 
     def on_time_start(self, sender, *data):
         """Callback de Time t=0.0
