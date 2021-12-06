@@ -20,6 +20,7 @@ KTS2MS = 0.5144447
 DEG2RAD = 0.01745329
 
 NM2M = 1852
+GRAV = 9.81
 
 InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 0, 0] #la vitesse de décollage est de 110 m/s
 
@@ -88,28 +89,56 @@ class FGS:
         """
         pass
         #mettre à jour les infos connues sur l'avion (unpack data)
-        self.state_vector = data.copy()
-        #
+        self.state_vector = [x, y, z, vp, fpa, psi, phi] = data
+        #calculer le reculement du seuil en fonction du waypoint qui suit
+        wpt_target = self.flight_plan[self.current_target_on_plan].infos()
+        if self.targetmode == OVERFLY:
+            seuil_ex = 0
+            distance_max = 1*NM2M
+        else:
+            if self.current_target_on_plan != 0:
+                wpt_target_before = self.flight_plan[self.current_target_on_plan-1].infos()
+                axe_actuel = math.atan2(wpt_target[2]- wpt_target_before[2], wpt_target[1]- wpt_target_before[1])
+            else:
+                axe_actuel = math.atan2(wpt_target[2]-self.state_vector[1], wpt_target[1]-self.state_vector[0])
+            
+            if self.current_target_on_plan != len(self.flight_plan)-1:
+                wpt_target_next = self.flight_plan[self.current_target_on_plan+1].infos()
+                axe_next = axe_actuel = math.atan2(wpt_target_next[2]- wpt_target[2], wpt_target_next[1]- wpt_target[1])
+            else:
+                axe_next = axe_actuel
+            delta_khi = axe_next - axe_actuel
+            seuil_ex = vp**2/(GRAV*math.tan(self.phi_max))*math.tan(delta_khi/2)
 
+        ex = math.cos(x-wpt_target[1])+math.sin(y-wpt_target[2])
+        distance = math.sqrt((x-wpt_target[1])**2+(y-wpt_target[2])**2)
+
+        #si en mode dirto
         if self.dirto_on:
-            #Séquençage
+            #Séquençage 
+
             
             #Envoyer la prochaine target
             IvySendMsg(TARGET_MSG.format(self.flight_plan[self.current_target_on_plan]))
         
         #Sinon
         else:
-            #si wpt a été dépassé (overFly)
             if self.targetmode == OVERFLY:
-                #envoyer dirtorequest
-                IvySendMsg("DirtoRequest")
-
-                #continuer à envoyer la même target tant que pas de nv dirto
-
-            #sinon
+                if (ex > 0):
+                    pass
+                    #vérifier si distance inf à distmax
+                        #séquencer, passer au suivant
+                else:
+                    pass
+                    #pas encore
             else:
-                #envoyer la même requête qui a été générée lors de la réception du dirto
-                IvySendMsg()
+                if (ex + seuil_ex > 0):
+                    pass
+                    #séquencer, passer au suivant
+                else:
+                    pass
+                    #pas encore
+
 
 
     def on_dirto(self, sender, *data):
