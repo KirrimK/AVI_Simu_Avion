@@ -5,8 +5,8 @@ import time
 import math
 
 STATEVEC_REGEX = "StateVector x=(\S+) y=(\S+) z=(\S+) Vp=(\S+) fpa=(\S+) psi=(\S+) phi=(\S+)"
-#WINDCOMP_REGEX = "WindComponent VWind=(\S+) dirWind=(\S+)"
-#DM_REGEX = "MagneticDeclination MagneticDeclination=(\S+)"
+WINDCOMP_REGEX = "WindComponent VWind={} dirWind={}"
+DM_REGEX = "MagneticDeclination MagneticDeclination={}"
 DIRTO_REGEX = "DIRTO Wpt=(\S+)"
 TIMESTART_REGEX = "Time t=1.0"
 LIMITES_REGEX = "MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)"
@@ -65,6 +65,7 @@ class FGS:
             - filename: string
         """
         self.dirto_on = False
+        self.waiting_dirto = False
         self.dirto_target_number = 0
         self.phi_max = 0 #radians
         self.flight_plan = load_flight_plan(filename)
@@ -75,10 +76,22 @@ class FGS:
         self.dirwind = dirwind
         self.dm = MagneticDeclination
         self.state_vector = InitStateVector.copy()
-        IvyBindMsg(self.on_state_vector, STATEVEC_REGEX)
-        IvyBindMsg(self.on_dirto, DIRTO_REGEX)
-        IvyBindMsg(self.on_time_start, TIMESTART_REGEX)
-        IvyBindMsg(self.on_limit_msg, LIMITES_REGEX)
+        self.idbind1 = IvyBindMsg(self.on_state_vector, STATEVEC_REGEX)
+        self.idbind2 = IvyBindMsg(self.on_dirto, DIRTO_REGEX)
+        self.idbind3 = IvyBindMsg(self.on_time_start, TIMESTART_REGEX)
+        self.idbind4 = IvyBindMsg(self.on_limit_msg, LIMITES_REGEX)
+    
+    def __enter__(self):
+        return self
+
+    def unbind(self):
+        IvyUnBindMsg(self.idbind1)
+        IvyUnBindMsg(self.idbind2)
+        IvyUnBindMsg(self.idbind3)
+        IvyUnBindMsg(self.idbind4)
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.unbind()
 
     def on_state_vector(self, sender, *data):
         """Callback de StateVector
@@ -120,14 +133,40 @@ class FGS:
             
             #Envoyer la prochaine target
             IvySendMsg(TARGET_MSG.format(self.flight_plan[self.current_target_on_plan]))
-        
+        if self.waiting_dirto:
+            pass
         #Sinon
         else:
             if self.targetmode == OVERFLY:
                 if (ex > 0):
-                    pass
                     #vérifier si distance inf à distmax
+                    if (distance < distance_max):
+                        #ok
+                        self.current_target_on_plan += 1
+                        new_tgt = self.flight_plan[self.current_target_on_plan]
+                        _, x_wpt, y_wpt, z_wpt, tgtmode = new_tgt.infos()
+                        contrainte = z_wpt
+                        if contrainte == -1:
+                            found_next = False
+                            for j in range(self.current_target_on_plan, len(self.flight_plan)):
+                                if self.flight_plan[j].infos()[3] != -1:
+                                    contrainte = self.flight_plan[j].infos()[3]
+                                    break
+                            if not found_next:
+                                contrainte = self.lastsenttarget[2]
+                        self.targetmode = tgtmode
+                        self.lastsenttarget = (x_wpt, y_wpt, contrainte, axe_next)
+                        IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
                         #séquencer, passer au suivant
+                    else:
+                        #nope, dirtorequest
+                        self.waiting_dirto = True
+                        route_actuelle = psi# + derive à calculer
+                        IvySendMsg("DirtoRequest")
+                        self.lastsenttarget = (x, y, z, route_actuelle)
+                        IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
+                    
+                        
                 else:
                     pass
                     #pas encore
@@ -214,3 +253,8 @@ if __name__=="__main__":
 
 #def generic_callback(sender, *data):
 #    pass
+
+
+#with FGS("", fdve, efd, rftr) as fgs_test1:
+#    dujghb fpathconf
+#    tests

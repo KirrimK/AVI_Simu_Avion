@@ -12,6 +12,7 @@ class Window(QWidget):
 
         self.radio = IvyRadio()
         self.manche = MancheRadio(self)
+        self.manche.runPygame()
         self.pBrut = 0
         self.nzBrut = 0
         self.isAPOn = True
