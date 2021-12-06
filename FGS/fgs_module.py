@@ -88,7 +88,8 @@ class FGS:
         #mettre à jour les infos connues sur l'avion (unpack data)
         self.state_vector = data.copy()
         if self.dirto_on:
-            #Séquençage
+            #Séquençage 
+
             
             #Envoyer la prochaine target
             IvySendMsg(TARGET_MSG.format(self.flight_plan[self.current_target_on_plan]))
