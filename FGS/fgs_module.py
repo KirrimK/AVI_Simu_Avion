@@ -8,7 +8,9 @@ DIRTO_REGEX = "DIRTO Wpt=(\S+)"
 TIMESTART_REGEX = "Time t=1.0"
 LIMITES_REGEX = "MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)"
 
-InitStateVector=[0,0,0,110,0,0,0] #la vitesse de décollage est de 110 m/s
+KTS2MS = 0.5144447
+
+InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 0, 0] #la vitesse de décollage est de 110 m/s soit 
 
 class Waypoint:
     """
@@ -51,8 +53,9 @@ class FGS:
         self.flight_plan = load_flight_plan(filename)
         self.current_target_on_plan = 0
         self.lastsenttarget = ""
-        self.wind = WindComponent
+        self.wind = WindComponent # c'est une liste comprenant la vitesse du vent et son orientation (dans cet ordre)
         self.dm = MagneticDeclination
+        self.state_vector = InitStateVector.copy()
         IvyBindMsg(self.on_state_vector, STATEVEC_REGEX)
         IvyBindMsg(self.on_dirto, DIRTO_REGEX)
         IvyBindMsg(self.on_time_start, TIMESTART_REGEX)
@@ -67,6 +70,7 @@ class FGS:
         """
         pass
         #mettre à jour les infos connues sur l'avion (unpack data)
+
         #si mode dirto pas enclenché:
             #séquençage
 
@@ -85,6 +89,8 @@ class FGS:
             - Target
         """
         pass
+        #pas de dirto sur un pt du pdv déjà séquencé
+        #le dirto est un raccourci dans le PDV
 
     def on_time_start(self, sender, *data):
         """Callback de Time t=0.0
@@ -94,7 +100,13 @@ class FGS:
             - WindComponent
             - MagneticDeclination
         """
-        pass        
+        strInitStateVector = ",".join(InitStateVector) #on passe la liste en chaîne de caractère
+        strWindComponent = ",".join(self.wind) #idem
+        strMagneticDeclination = str(self.dm) #idem même si ce n'est pas une liste
+        IvySendMsg("StateVector x={} y={} z={} Vp={} fpa={} psi={} phi={}".format(0,0,0,110,0,0,0))
+        IvySendMsg("")
+        IvySendMsg("")
+
 
     def on_limit_msg(self, sender, *data):
         """Retourne une liste de Waypoints (un PDV) depuis un fichier
