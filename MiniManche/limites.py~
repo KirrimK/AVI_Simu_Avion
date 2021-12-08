@@ -24,8 +24,6 @@ R=278.05
 T0=288.16 #en Kelvin
 CI=0.35 #Cost Index
 
-#mamamamama
-
 
 class Avion:
 	def __init__(self,alt,vitesse_i,vitesse,Mach,nx,nz,p,config_physique,train,phi,gamma,PA):
