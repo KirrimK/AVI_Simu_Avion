@@ -68,16 +68,11 @@ class MancheRadio():
                    self.done = True # Flag that we are done so we exit this loop.
                 elif event.type == pygame.JOYBUTTONDOWN:
                     print("Joystick button pressed.")
-                    self.done = True
+                    if joystick.get_button(0) == 1:
+                        print("Désactivation du PA")
                 elif event.type == pygame.JOYBUTTONUP:
                     print("Joystick button released.")
-                    self.window.radio.onBoutonAPPush(None, True)
 
-            #
-            # DRAWING STEP
-            #
-            # First, clear the screen to white. Don't put other drawing commands
-            # above this, or they will be erased with this command.
             screen.fill(WHITE)
             textPrint.reset()
 
@@ -104,14 +99,6 @@ class MancheRadio():
                 name = joystick.get_name()
                 textPrint.tprint(screen, "Joystick name: {}".format(name))
 
-                try:
-                    guid = joystick.get_guid()
-                except AttributeError:
-                    # get_guid() is an SDL2 method
-                    pass
-                else:
-                    pass
-                    textPrint.tprint(screen, "GUID: {}".format(guid))
 
                 # Usually axis run in pairs, up/down for one, and left/right for
                 # the other.
@@ -134,6 +121,7 @@ class MancheRadio():
                     textPrint.tprint(screen,"Button {:>2} value: {}".format(i, button))
                 textPrint.unindent()
                 textPrint.unindent()
+
 
             #
             # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
