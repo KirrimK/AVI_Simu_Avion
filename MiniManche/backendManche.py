@@ -32,8 +32,6 @@ class MancheRadio():
         self.window = window
         self.thread_pygame = threading.Thread(target=self.runPygame,)
         self.done = False
-
-    def startThread(self):
         self.thread_pygame.start()
 
     def stopThread(self):
@@ -63,6 +61,8 @@ class MancheRadio():
             #
             # Possible joystick actions: JOYAXISMOTION, JOYBALLMOTION, JOYBUTTONDOWN,
             # JOYBUTTONUP, JOYHATMOTION
+            
+
             for event in pygame.event.get(): # User did something.
                 if event.type == pygame.QUIT: # If user clicked close.
                    self.done = True # Flag that we are done so we exit this loop.
