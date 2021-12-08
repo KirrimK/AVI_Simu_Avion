@@ -47,6 +47,13 @@ class Window(QWidget):
         
     def onVecteurDEtatSignal (self,argTuple):
         pass
-    def onCommandeAPSignal (self,argTuple):
-        pass
 
+    def onCommandeAPSignal (self,argTuple):
+        (nX, nZ, p)=argTuple
+        if self.isAPOn :
+            # TODO vérification de limites 
+            self.radio.sendAircraftCommand (nX, nZ, p)
+        else :
+            #TODO traitement des nz et p bruts
+            #TODO limites à vérifier
+            pass
