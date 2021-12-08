@@ -182,7 +182,7 @@ class FGS:
                     else:
                         basculer_waiting_dirto(x, y, self.lastsenttarget, psi)
                 else:
-                    #pas encore
+                    #pas encore dépassé le point
                     IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
             else:
                 if (ex + seuil_ex > 0):
