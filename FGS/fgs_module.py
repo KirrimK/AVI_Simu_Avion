@@ -128,7 +128,7 @@ class FGS:
 
         #si en mode dirto
         if self.dirto_on:
-            #Séquençage 
+            #Séquençage
 
             
             #Envoyer la prochaine target
