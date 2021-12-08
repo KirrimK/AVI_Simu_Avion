@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget
 import pygame
+import threading
 
 BLACK = pygame.Color('black')
 WHITE = pygame.Color('white')
@@ -31,7 +32,14 @@ class TextPrint(object):
 class MancheRadio():
     def __init__(self, window):
         self.window = window
+        self.thread_pygame = threading.Thread(target=self.runPygame,)
         self.done = False
+
+    def startThread(self):
+        self.thread_pygame.start()
+
+    def stopThread(self):
+        self.done = True
  
     def runPygame(self):
         pygame.init()
