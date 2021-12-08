@@ -62,6 +62,8 @@ class MancheRadio():
             # Possible joystick actions: JOYAXISMOTION, JOYBALLMOTION, JOYBUTTONDOWN,
             # JOYBUTTONUP, JOYHATMOTION
             
+            joystick = pygame.joystick.Joystick(0)
+            joystick.init()
 
             for event in pygame.event.get(): # User did something.
                 if event.type == pygame.QUIT: # If user clicked close.
@@ -76,56 +78,33 @@ class MancheRadio():
             screen.fill(WHITE)
             textPrint.reset()
 
-            # Get count of joysticks.
-            joystick_count = pygame.joystick.get_count()
 
-            textPrint.tprint(screen, "Number of joysticks: {}".format(joystick_count))
+            # Get the name from the OS for the controller/joystick.
+            name = joystick.get_name()
+            textPrint.tprint(screen, "Joystick name: {}".format(name))
+
+
+            # Usually axis run in pairs, up/down for one, and left/right for
+            # the other.
+            axes = joystick.get_numaxes()
+            textPrint.tprint(screen, "Number of axes: {}".format(axes))
             textPrint.indent()
 
-            # For each joystick:
-            for i in range(joystick_count):
-                joystick = pygame.joystick.Joystick(i)
-                joystick.init()
+            self.window.pBrut = joystick.get_axis(0)
+            textPrint.tprint(screen, "Axis 0 value: {:>6.3f}".format(joystick.get_axis(0)))
+            self.window.nzBrut = joystick.get_axis(1)
+            textPrint.tprint(screen, "Axis 1 value: {:>6.3f}".format(joystick.get_axis(1)))
+            textPrint.unindent()
 
-                try:
-                    jid = joystick.get_instance_id()
-                except AttributeError:
-                    # get_instance_id() is an SDL2 method
-                    jid = joystick.get_id()
-                textPrint.tprint(screen, "Joystick {}".format(jid))
-                textPrint.indent()
+            buttons = joystick.get_numbuttons()
+            textPrint.tprint(screen, "Number of buttons: {}".format(buttons))
+            textPrint.indent()
 
-                # Get the name from the OS for the controller/joystick.
-                name = joystick.get_name()
-                textPrint.tprint(screen, "Joystick name: {}".format(name))
-
-
-                # Usually axis run in pairs, up/down for one, and left/right for
-                # the other.
-                axes = joystick.get_numaxes()
-                textPrint.tprint(screen, "Number of axes: {}".format(axes))
-                textPrint.indent()
-
-                self.window.pBrut = joystick.get_axis(0)
-                textPrint.tprint(screen, "Axis 0 value: {:>6.3f}".format(joystick.get_axis(0)))
-                self.window.nzBrut = joystick.get_axis(1)
-                textPrint.tprint(screen, "Axis 1 value: {:>6.3f}".format(joystick.get_axis(1)))
-                textPrint.unindent()
-
-                buttons = joystick.get_numbuttons()
-                textPrint.tprint(screen, "Number of buttons: {}".format(buttons))
-                textPrint.indent()
-
-                for i in range(buttons):
-                    button = joystick.get_button(i)
-                    textPrint.tprint(screen,"Button {:>2} value: {}".format(i, button))
-                textPrint.unindent()
-                textPrint.unindent()
-
-
-            #
-            # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
-            #
+            for i in range(buttons):
+                button = joystick.get_button(i)
+                textPrint.tprint(screen,"Button {:>2} value: {}".format(i, button))
+            textPrint.unindent()
+            textPrint.unindent()
 
             # Go ahead and update the screen with what we've drawn.
             pygame.display.flip()
@@ -133,9 +112,6 @@ class MancheRadio():
             # Limit to 20 frames per second.
             clock.tick(20)
 
-        # Close the window and quit.
-        # If you forget this line, the program will 'hang'
-        # on exit if running from IDLE.
         pygame.quit()
 
 
