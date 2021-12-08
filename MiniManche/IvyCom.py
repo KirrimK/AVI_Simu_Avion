@@ -30,6 +30,7 @@ class IvyRadio ():
         IvyBindMsg (self.onBoutonAPPush, self.btnPousse)
         IvyBindMsg (self.onRcvStateVector, self.vecteurDEtat)
         IvyBindMsg (self.onRcvAPCommand, self.commandeAutoPilote)
+        self.startRadio ()
 
     def startRadio (self):
         """Fonction À APPELER IMPÉRATIVEMENT AU LANCEMENT DU PROGRAMME. Démarre la radio."""

@@ -17,6 +17,7 @@ class Window(QWidget):
         self.pBrut = 0
         self.nzBrut = 0
         self.isAPOn = True
+        self.show()
 
     def setupSliders (self):
         layout = QHBoxLayout()
@@ -30,6 +31,7 @@ class Window(QWidget):
         self.sliderTrainAtt.show()
         layout.addWidget (self.labelTrain)
         layout.addWidget (self.sliderTrainAtt)
+        self.sliderTrainAtt.valueChanged.connect (self.avion.)
 
         self.sliderFlaps = QSlider (Qt.Vertical)
         self.sliderFlaps.setMaximum (4)
@@ -39,6 +41,7 @@ class Window(QWidget):
         
         self.sliderFlaps.setTickInterval (1)
         self.sliderFlaps.show ()
+
     def onButtonPushSignal (self,forceOff):
         if forceOff:
             self.isAPOn = False
@@ -49,7 +52,8 @@ class Window(QWidget):
         self.radio.sendAPState(self.isAPOn)
         
     def onVecteurDEtatSignal (self,argTuple):
-        pass
+        (x,y,alt,V,gamma,psi,phi) = argTuple
+        self.avion.reception_vecteur_etat (alt,V,gamma,phi)
 
     def onCommandeAPSignal (self,argTuple):
         (nX, nZ, p)=argTuple
