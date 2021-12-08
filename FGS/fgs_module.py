@@ -100,6 +100,32 @@ class FGS:
         Sortie Ivy: 1 message sur Ivy
             - Target
         """
+        def basculer_waiting_dirto(x, y, lastsent, psi):
+            #nope, dirtorequest
+            self.waiting_dirto = True
+            derive = 0 # calculer
+            route_actuelle = psi + derive
+            IvySendMsg("DirtoRequest")
+            self.lastsenttarget = (x, y, lastsent[2], route_actuelle)
+            IvySendMsg(TARGET_MSG.format(*lastsent))
+        
+        def passer_wpt_suiv():
+            new_tgt = self.flight_plan[self.current_target_on_plan]
+            _, x_wpt, y_wpt, z_wpt, tgtmode = new_tgt.infos()
+            contrainte = z_wpt
+            if contrainte == -1:
+                found_next = False
+                for j in range(self.current_target_on_plan, len(self.flight_plan)):
+                    if self.flight_plan[j].infos()[3] != -1:
+                        found_next = True
+                        contrainte = self.flight_plan[j].infos()[3]
+                        break
+                if not found_next:
+                    contrainte = self.lastsenttarget[2]
+            self.targetmode = tgtmode
+            self.lastsenttarget = (x_wpt, y_wpt, contrainte, axe_next)
+            IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
+
         #mettre à jour les infos connues sur l'avion (unpack data)
         self.state_vector = [x, y, z, vp, fpa, psi, phi] = data
         #calculer le reculement du seuil en fonction du waypoint qui suit
@@ -128,11 +154,16 @@ class FGS:
         #si en mode dirto
         if self.dirto_on:
             #dirto flyby par défaut
-            #Séquençage 
-
-            IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
-            #Envoyer la prochaine target
-            IvySendMsg(TARGET_MSG.format(self.flight_plan[self.current_target_on_plan]))
+            if (ex > -seuil_ex):
+                self.dirto_on
+                #Envoyer la prochaine target
+                self.current_target_on_plan += 1
+                if self.current_target_on_plan >= len(self.flight_plan):
+                    basculer_waiting_dirto(x, y, self.lastsenttarget, psi)
+                else:
+                    passer_wpt_suiv()
+            else:
+                IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
         elif self.waiting_dirto:
             #en attente de dirto, maintenir l'avion sur axe lorsque dépassé point sans séquencer
             IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
@@ -144,41 +175,26 @@ class FGS:
                     if (self.targetmode == OVERFLY and distance < distance_max):
                         #ok, séquencer et, passer au suivant
                         self.current_target_on_plan += 1
-                        new_tgt = self.flight_plan[self.current_target_on_plan]
-                        _, x_wpt, y_wpt, z_wpt, tgtmode = new_tgt.infos()
-                        contrainte = z_wpt
-                        if contrainte == -1:
-                            found_next = False
-                            for j in range(self.current_target_on_plan, len(self.flight_plan)):
-                                if self.flight_plan[j].infos()[3] != -1:
-                                    found_next = True
-                                    contrainte = self.flight_plan[j].infos()[3]
-                                    break
-                            if not found_next:
-                                contrainte = self.lastsenttarget[2]
-                        self.targetmode = tgtmode
-                        self.lastsenttarget = (x_wpt, y_wpt, contrainte, axe_next)
-                        IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) 
+                        if self.current_target_on_plan >= len(self.flight_plan):
+                            basculer_waiting_dirto(x, y, self.lastsenttarget, psi)
+                        else:
+                            passer_wpt_suiv()
                     else:
-                        #nope, dirtorequest
-                        self.waiting_dirto = True
-                        derive = 0 # calculer
-                        route_actuelle = psi + derive
-                        IvySendMsg("DirtoRequest")
-                        self.lastsenttarget = (x, y, self.lastsenttarget[2], route_actuelle)
-                        IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))    
+                        basculer_waiting_dirto(x, y, self.lastsenttarget, psi)
                 else:
                     #pas encore
                     IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
             else:
                 if (ex + seuil_ex > 0):
-                    #séquencer, passer au suivant
-                    pass
+                    #ok, séquencer et, passer au suivant
+                    self.current_target_on_plan += 1
+                    if self.current_target_on_plan >= len(self.flight_plan):
+                        basculer_waiting_dirto(x, y, self.lastsenttarget, psi)
+                    else:
+                        passer_wpt_suiv()
                 else:
                     #pas encore
                     IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
-
-
 
     def on_dirto(self, sender, *data):
         """Callback de DIRTO
@@ -193,7 +209,7 @@ class FGS:
         if self.waiting_dirto:
             self.waiting_dirto = False
         #chercher le WPT dans la liste des WPTs non séquencés, via recherche linéaire
-        for i in range(self.current_target_on_plan, len(self.flight_plan)):
+        for i in range(self.current_target_on_plan%len(self.flight_plan), len(self.flight_plan)):
             if self.flight_plan[i].name() == dirto_wpt:
                 #get les infos du Wpt
                 _, x_wpt, y_wpt, z_wpt, _ = self.flight_plan[i].infos()
