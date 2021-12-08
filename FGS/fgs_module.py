@@ -172,7 +172,7 @@ class FGS:
             if self.targetmode == OVERFLY:
                 if (ex > -seuil_ex):
                     #vérifier si distance inf à distmax
-                    if (self.targetmode == OVERFLY and distance < distance_max):
+                    if (distance < distance_max):
                         #ok, séquencer et, passer au suivant
                         self.current_target_on_plan += 1
                         if self.current_target_on_plan >= len(self.flight_plan):
