@@ -14,7 +14,6 @@ class Window(QWidget):
         self.radio = IvyRadio()
         self.manche = MancheRadio(self)
         self.avion = Avion (self)
-        self.manche.startThread()
         self.pBrut = 0
         self.nzBrut = 0
         self.isAPOn = True
