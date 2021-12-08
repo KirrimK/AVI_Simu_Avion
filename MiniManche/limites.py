@@ -87,85 +87,85 @@ class Avion:
 				self.vitesse_lim=177*KT2MS
 
 	def vitesse_i(self):
-		alt_lim=[10000*FT2M,24600*FTSM]
+		alt_lim=[10000*FT2M,24600*FT2M]
 		self.vitess_i=0
 		if self.config_physique==0 and self.train==False:
 			if self.alt<alt_lim[0]:
-						
+				self.vitesse_i=220*KT2MS
 			if alt_lim[0]<self.alt<alt_lim[1]:
-					self.vitesse_i=320*KTS2MS
+				self.vitesse_i=320*KT2MS
 			if self.alt>alt_lim[1]:
-					self.Mach=True
-					#Mach consigne=0.78
-					#calcul du Mach
-					T=T0-6.5*(avion.alt/1000)
-					a=sqrt(gamma_constante*R*T)
-					self.vitesse_i=0.78*a
-				if self.train==True and self.config_physique==0:
-						self.Mach=False
-				self.vitesse_i=280*KT2MS
+				self.Mach=True
+				#Mach consigne=0.78
+				#calcul du Mach
+				T=T0-6.5*(self.alt/1000)
+				a=sqrt(gamma_constante*R*T)
+				self.vitesse_i=0.78*a
+			if self.train==True and self.config_physique==0:
+				self.Mach=False
+			self.vitesse_i=280*KT2MS
 
-			if self.config_physique==1:
-				self.Mach=False
-				self.vitesse_i=230*KT2MS
-			if self.config_physique==2:
-				self.Mach=False
-				self.vitesse_i=200*KT2MS
-			if self.config_physique==3:
-				self.Mach=False
-				self.vitesse_i=185*KT2MS
-			if self.config_physique==4:
-				self.Mach=False
-				self.vitesse_i=177*KT2MS
-		def nz_limites(self):
-			#les limitations du facteur de charge dépendent de la configuration physique de l'avion
-			#tester si ces limites fonctionnent bien avec les trains sortis
-			if self.train==False:
-				if self.config_physique==0:
-					self.nz_lim=[-1,2.5]
-				else:
-					self.nz_lim=[0,2]
-			if self.train==True:
-				if self.config_physique==0:
-					self.nz_lim=[0,2.5]
-				else:
-					self.nz_lim=[0,1.5]
-
-		def nx_limites(self):
-			#il va falloir tester si ces limites ne sont pas trop restrictives, rien trouvé pour l'instant dans la doc et on a trouvé ça après discution avec M.Rouillard
-				if self.train==False:
-				if self.config_physique==0:
-					self.nx_lim=[-1.5,1.5]
-				else:
-					self.nx_lim=[-1,1]
+		if self.config_physique==1:
+			self.Mach=False
+			self.vitesse_i=230*KT2MS
+		if self.config_physique==2:
+			self.Mach=False
+			self.vitesse_i=200*KT2MS
+		if self.config_physique==3:
+			self.Mach=False
+			self.vitesse_i=185*KT2MS
+		if self.config_physique==4:
+			self.Mach=False
+			self.vitesse_i=177*KT2MS
+	def nz_limites(self):
+		#les limitations du facteur de charge dépendent de la configuration physique de l'avion
+		#tester si ces limites fonctionnent bien avec les trains sortis
+		if self.train==False:
+			if self.config_physique==0:
+				self.nz_lim=[-1,2.5]
 			else:
-				self.nx_lim=[-0.5,0.5]
+				self.nz_lim=[0,2]
+		if self.train==True:
+			if self.config_physique==0:
+				self.nz_lim=[0,2.5]
+			else:
+				self.nz_lim=[0,1.5]
 
-		def p_lim(self):
-				if self.PA=False:
-						if self.phi>=67*DEG2RAD:
-								self.p_lim=[-15*DEG2RAD,0]
-						if self.phi<=67*DEG2RAD:
-								self.p_lim=0[0,15*DEG2RAD]
-						else:
-								self.p_lim=[-15*DEG2RAD,15*DEG2RAD] #pour l'exprimer en radian/s
+	def nx_limites(self):
+		#il va falloir tester si ces limites ne sont pas trop restrictives, rien trouvé pour l'instant dans la doc et on a trouvé ça après discution avec M.Rouillard
+		if self.train==False:
+			if self.config_physique==0:
+				self.nx_lim=[-1.5,1.5]
+			else:
+				self.nx_lim=[-1,1]
+		else:
+			self.nx_lim=[-0.5,0.5]
+
+	def p_lim(self):
+		if self.PA==False:
+				if self.phi>=67*DEG2RAD:
+						self.p_lim=[-15*DEG2RAD,0]
+				if self.phi<=67*DEG2RAD:
+						self.p_lim=0[0,15*DEG2RAD]
 				else:
-						if self.phi>=33*DEG2RAD:
-								self.p_lim=[-15*DEG2RAD,0]
-						if self.phi<=33*DEG2RAD:
-								self.p_lim=0[0,15*DEG2RAD]
-						else:
-								self.p_lim=[-15*DEG2RAD,15*DEG2RAD] #pour l'exprimer en radian/s
-						
+						self.p_lim=[-15*DEG2RAD,15*DEG2RAD] #pour l'exprimer en radian/s
+		else:
+				if self.phi>=33*DEG2RAD:
+						self.p_lim=[-15*DEG2RAD,0]
+				if self.phi<=33*DEG2RAD:
+						self.p_lim=0[0,15*DEG2RAD]
+				else:
+						self.p_lim=[-15*DEG2RAD,15*DEG2RAD] #pour l'exprimer en radian/s
 				
-		def phi_lim(self):
-			if abs(self.phi)>33*DEG2RAD:
+		
+	def phi_lim(self):
+		if abs(self.phi)>33*DEG2RAD:
 			self.PA=False
-					self.window.onButtonPushSignal(True)#on force l'AP à ê off c'est pour ça que l'on a true et pas false 
-			if self.PA==False:
+			self.window.onButtonPushSignal(True)#on force l'AP à ê off c'est pour ça que l'on a true et pas false 
+		if self.PA==False:
 			self.phi_lim=[-67*DEG2RAD,67*DEG2RAD]
-				else:
-						self.phi_lim=[-33*DEG2RAD,33*DEG2RAD]
+		else:
+			self.phi_lim=[-33*DEG2RAD,33*DEG2RAD]
 
 				
 #limite en gamma 25,30
@@ -187,18 +187,3 @@ if __name__=='__main__':
 		A320=Avion(6000,113,)
 		#à faire : repasser tout en méthodes de la classe avion et rajouter les limites en paramètres
 		#faire la connexion avec les sliders de la fenêtre window
-
-
-
-
-
-
-
-
-
-
-
-					.
-					
-		
-		
