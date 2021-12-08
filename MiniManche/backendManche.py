@@ -1,5 +1,4 @@
-import pygame
-import threading
+import pygame, threading
 
 BLACK = pygame.Color('black')
 WHITE = pygame.Color('white')
