@@ -119,7 +119,7 @@ def nz_limites(avion):
 	nz_lim=[0,0] #liste avec les valeurs limites de nz
 	if avion.train==False:
 		if avion.config_physique==0:
-		 	nz_lim=[-1,2.5]
+			nz_lim=[-1,2.5]
 		else:
 			nz_lim=[0,2]
 	if avion.train==True:
