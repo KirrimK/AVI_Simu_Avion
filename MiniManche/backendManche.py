@@ -72,6 +72,7 @@ class MancheRadio():
                     print("Joystick button pressed.")
                     if joystick.get_button(0) == 1:
                         print("Désactivation du PA")
+                        self.window.onButtonPushSignal(True)
                 elif event.type == pygame.JOYBUTTONUP:
                     print("Joystick button released.")
 
@@ -90,10 +91,17 @@ class MancheRadio():
             textPrint.tprint(screen, "Number of axes: {}".format(axes))
             textPrint.indent()
 
+            if ((abs(self.window.pBrut) < 0.5) and (abs(joystick.get_axis(0)) > 0.5)) or ((abs(self.window.nzBrut) < 0.5) and (abs(joystick.get_axis(1)) > 0.5)):
+                print("Désactivation du PA")
+                self.window.onButtonPushSignal(True)
+
             self.window.pBrut = joystick.get_axis(0)
             textPrint.tprint(screen, "Axis 0 value: {:>6.3f}".format(joystick.get_axis(0)))
             self.window.nzBrut = joystick.get_axis(1)
             textPrint.tprint(screen, "Axis 1 value: {:>6.3f}".format(joystick.get_axis(1)))
+
+            
+
             textPrint.unindent()
 
             buttons = joystick.get_numbuttons()
