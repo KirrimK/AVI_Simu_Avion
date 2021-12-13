@@ -81,7 +81,7 @@ class FGS:
         self.phi_max = 0 #radians
         self.flight_plan = load_flight_plan(filename) #list of Waypoint
         self.current_target_on_plan = 0 #numéro du WPT dans le PDV actuellement en target
-        self.lastsenttarget = (0, 0, 0, 0) #x, y, z, contrainte
+        self.lastsenttarget = (0, 0, 0, 0) #x, y, contrainte, route
         self.targetmode = FLYBY
         self.vwind = vwind #m/s
         self.dirwind = dirwind #radians
@@ -111,22 +111,22 @@ class FGS:
         Sortie Ivy: 1 message sur Ivy
             - Target
         """
-        def basculer_waiting_dirto(x, y, lastsent):
+        def basculer_waiting_dirto(x, y, lastsent): #lastsent comme lastsenttarget
             #nope, dirtorequest
             self.waiting_dirto = True #devient VRAI car on envoie une dirto request
             #derive = math.asin(self.vwind*math.sin(route_actuelle-self.dirwind)/self.state_vector[3]*math.cos(fpa)) # calculer
             #route_actuelle = psi + derive
             route_actuelle = trianglevitesses(self.vwind, self.dirwind, self.state_vector[3], self.state_vector[5])
             IvySendMsg("DirtoRequest")
-            self.lastsenttarget = (x, y, lastsent[2], route_actuelle)
-            IvySendMsg(TARGET_MSG.format(*lastsent))
+            self.lastsenttarget = (x, y, lastsent[2], route_actuelle) #on met à jour la dernière target envoyée
+            IvySendMsg(TARGET_MSG.format(*lastsent)) #on envoie la dernière target
 
         def passer_wpt_suiv():
             new_tgt = self.flight_plan[self.current_target_on_plan] #on définit une nouvelle target à partir du plan de vol (elle devient notre target actuelle)
             _, x_wpt, y_wpt, z_wpt, tgtmode = new_tgt.infos() #on prend les infos de la target (infos dont on a besoin)
             contrainte = z_wpt # la contrainte correspond à l'altitude
             if contrainte == -1: 
-                found_next = False #on initialise à faux le fait qu'on a pas encore trouvé la prochaine contrainte
+                found_next = False #on initialise à FAUX le fait qu'on a pas encore trouvé la prochaine contrainte
                 for j in range(self.current_target_on_plan, len(self.flight_plan)): #pour chaque target dans le plan de vol
                     if self.flight_plan[j].infos()[3] != -1: #si la contrainte de la target est -1
                         found_next = True #on connaît maintenant la prochaine contrainte
@@ -136,17 +136,17 @@ class FGS:
                     contrainte = self.lastsenttarget[2] #contrainte vaut l'altitude z de la dernière target
             self.targetmode = tgtmode #on applique aussi le mode de la target
             self.lastsenttarget = (x_wpt, y_wpt, contrainte, axe_next) #on met à jour la dernière target envoyée
-            IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
+            IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
 
         #mettre à jour les infos connues sur l'avion (unpack data)
         self.state_vector = [x, y, z, vp, fpa, psi, phi] = data
         #calculer le reculement du seuil en fonction du waypoint qui suit
-        wpt_target = self.flight_plan[self.current_target_on_plan].infos()
-        distance_max = 1*NM2M
-        if self.targetmode == OVERFLY:
-            seuil_ex = 0
-        else:
-            if self.current_target_on_plan != 0:
+        wpt_target = self.flight_plan[self.current_target_on_plan].infos() #on prend les infos de la target actuelle
+        distance_max = 1*NM2M #on définit la distance maximale d'écart entre l'avion et la route
+        if self.targetmode == OVERFLY: 
+            seuil_ex = 0 #on initialise le seuil ex à O
+        else: #si c'est le mode FlyBy
+            if self.current_target_on_plan != 0: #si la target actuelle n'est pas le premier wpt
                 wpt_target_before = self.flight_plan[self.current_target_on_plan-1].infos()
                 axe_actuel = math.atan2(wpt_target[2]- wpt_target_before[2], wpt_target[1]- wpt_target_before[1])
             else:
