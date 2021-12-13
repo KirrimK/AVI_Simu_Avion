@@ -31,7 +31,7 @@ def print_debug(text):
 InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 0, 0] #la vitesse de décollage est de 110 m/s
 
 def resetFGS(sender, *data):
-    print_debug("FGS reset\n")
+    print_debug("FGS reset")
     global fgs
     fgs.unbind()
     fgs = FGS(data[0],0,0,0.2389)
