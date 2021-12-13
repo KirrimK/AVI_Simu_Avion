@@ -24,6 +24,10 @@ GRAV = 9.81
 
 InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 0, 0] #la vitesse de décollage est de 110 m/s
 
+def resetFGS(sender,  data):
+    global fgs
+    fgs.unbind()
+    fgs = FGS(data[0],0,0,0.2389)
 
 class Waypoint:
     """
@@ -54,6 +58,13 @@ def load_flight_plan(filename):
             listWpt.append(Waypoint(list[0],list[1],list[2],list[3],list[4]))
     return listWpt 
 
+def trianglevitesses(vwind, dirwind, vp, psi):
+    #calculer vecteur vsol
+    vsvec = [vp*math.cos(psi)+vwind*math.cos(math.pi*dirwind), vp*math.sin(psi)+vwind*math.sin(math.pi*dirwind)]
+    vsol = math.sqrt(vsvec[0]**2+vsvec[1]**2)
+    route = math.atan2(vsvec[1], vsvec[0])
+    return vsol, route
+
 class FGS:
     """
     L'objet contenant toutes les fonctions et variables du FGS
@@ -64,18 +75,18 @@ class FGS:
         Arguments:
             - filename: string
         """
-        self.dirto_on = False
-        self.waiting_dirto = False
-        self.dirto_target_number = 0
+        self.dirto_on = False #flag qui indique si on est en mode dirto ou non
+        self.waiting_dirto = False #flag qui indique si on est en attente d'un dirto
+        self.dirto_target_number = 0 #numéro du WPT dans le PDV en target du dirto
         self.phi_max = 0 #radians
-        self.flight_plan = load_flight_plan(filename)
-        self.current_target_on_plan = 0
-        self.lastsenttarget = (0, 0, 0, 0)
+        self.flight_plan = load_flight_plan(filename) #list of Waypoint
+        self.current_target_on_plan = 0 #numéro du WPT dans le PDV actuellement en target
+        self.lastsenttarget = (0, 0, 0, 0) #x, y, z, contrainte
         self.targetmode = FLYBY
-        self.vwind = vwind 
-        self.dirwind = dirwind
-        self.dm = MagneticDeclination
-        self.state_vector = InitStateVector.copy()
+        self.vwind = vwind #m/s
+        self.dirwind = dirwind #radians
+        self.dm = MagneticDeclination #radians
+        self.state_vector = InitStateVector.copy() #x, y, z, vp, fpa, psi, phi
         self.idbind1 = IvyBindMsg(self.on_state_vector, STATEVEC_REGEX)
         self.idbind2 = IvyBindMsg(self.on_dirto, DIRTO_REGEX)
         self.idbind3 = IvyBindMsg(self.on_time_start, TIMESTART_REGEX)
@@ -100,30 +111,31 @@ class FGS:
         Sortie Ivy: 1 message sur Ivy
             - Target
         """
-        def basculer_waiting_dirto(x, y, lastsent, psi):
+        def basculer_waiting_dirto(x, y, lastsent):
             #nope, dirtorequest
             self.waiting_dirto = True #devient VRAI car on envoie une dirto request
-            derive = math.asin(self.vwind*math.sin(route_actuelle-self.dirwind)/self.state_vector[3]*math.cos(fpa)) # calculer
-            route_actuelle = psi + derive
+            #derive = math.asin(self.vwind*math.sin(route_actuelle-self.dirwind)/self.state_vector[3]*math.cos(fpa)) # calculer
+            #route_actuelle = psi + derive
+            route_actuelle = trianglevitesses(self.vwind, self.dirwind, self.state_vector[3], self.state_vector[5])
             IvySendMsg("DirtoRequest")
             self.lastsenttarget = (x, y, lastsent[2], route_actuelle)
             IvySendMsg(TARGET_MSG.format(*lastsent))
-        
+
         def passer_wpt_suiv():
-            new_tgt = self.flight_plan[self.current_target_on_plan]
-            _, x_wpt, y_wpt, z_wpt, tgtmode = new_tgt.infos()
-            contrainte = z_wpt
-            if contrainte == -1:
-                found_next = False
-                for j in range(self.current_target_on_plan, len(self.flight_plan)):
-                    if self.flight_plan[j].infos()[3] != -1:
-                        found_next = True
+            new_tgt = self.flight_plan[self.current_target_on_plan] #on définit une nouvelle target à partir du plan de vol (elle devient notre target actuelle)
+            _, x_wpt, y_wpt, z_wpt, tgtmode = new_tgt.infos() #on prend les infos de la target (infos dont on a besoin)
+            contrainte = z_wpt # la contrainte correspond à l'altitude
+            if contrainte == -1: 
+                found_next = False #on initialise à faux le fait qu'on a pas encore trouvé la prochaine contrainte
+                for j in range(self.current_target_on_plan, len(self.flight_plan)): #pour chaque target dans le plan de vol
+                    if self.flight_plan[j].infos()[3] != -1: #si la contrainte de la target est -1
+                        found_next = True #on connaît maintenant la prochaine contrainte
                         contrainte = self.flight_plan[j].infos()[3]
                         break
-                if not found_next:
-                    contrainte = self.lastsenttarget[2]
-            self.targetmode = tgtmode
-            self.lastsenttarget = (x_wpt, y_wpt, contrainte, axe_next)
+                if not found_next: #si on connaît déjà la prochaine contrainte
+                    contrainte = self.lastsenttarget[2] #contrainte vaut l'altitude z de la dernière target
+            self.targetmode = tgtmode #on applique aussi le mode de la target
+            self.lastsenttarget = (x_wpt, y_wpt, contrainte, axe_next) #on met à jour la dernière target envoyée
             IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
 
         #mettre à jour les infos connues sur l'avion (unpack data)
@@ -159,7 +171,7 @@ class FGS:
                 #Envoyer la prochaine target
                 self.current_target_on_plan += 1
                 if self.current_target_on_plan >= len(self.flight_plan):
-                    basculer_waiting_dirto(x, y, self.lastsenttarget, psi)
+                    basculer_waiting_dirto(x, y, self.lastsenttarget)
                 else:
                     passer_wpt_suiv()
             else:
@@ -176,7 +188,7 @@ class FGS:
                         #ok, séquencer et, passer au suivant
                         self.current_target_on_plan += 1
                         if self.current_target_on_plan >= len(self.flight_plan):
-                            basculer_waiting_dirto(x, y, self.lastsenttarget, psi)
+                            basculer_waiting_dirto(x, y, self.lastsenttarget)
                         else:
                             passer_wpt_suiv()
                     else:
@@ -189,7 +201,7 @@ class FGS:
                     #ok, séquencer et, passer au suivant
                     self.current_target_on_plan += 1
                     if self.current_target_on_plan >= len(self.flight_plan):
-                        basculer_waiting_dirto(x, y, self.lastsenttarget, psi)
+                        basculer_waiting_dirto(x, y, self.lastsenttarget)
                     else:
                         passer_wpt_suiv()
                 else:
@@ -261,9 +273,10 @@ class FGS:
 
 if __name__=="__main__":
     IvyInit("FGS", "Ready")
-    IvyStart("10.1.127.255:2010") #IP à changer
+    IvyStart("127.0.0.1:2010") #IP à changer
     time.sleep(1.0)
-    fgs = FGS("pdv.txt")
+    fgs = FGS("pdv.txt", 0, 0, 0.2389)
+    IvyBindMsg(resetFGS, "RESETFGS (\S+)")
 
 ##### Pour référence future #####
 #IvySendMsg("")
