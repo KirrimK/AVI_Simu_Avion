@@ -30,7 +30,7 @@ def test_pdv_nominal():
 	#test overFly
 	test_msg("StateVector x=30000 y=30001 z=7000 Vp=128 fpa=0 psi=0 phi=0", f)
 	#test DirtoRequest
-	test_msg("StateVector x=0 y=0 z=5000 Vp=128 fpa=0 psi=3.14 phi=0", f)
+	test_msg("StateVector x=0 y=30000 z=5000 Vp=128 fpa=0 psi=4.71 phi=0", f)
 	
 	f.close()
 
@@ -66,8 +66,7 @@ def reset_fgs(pdv):
 
 if __name__=="__main__":
 	IvyInit("FGS_test", "Ready")
-	IvyStart("127.0.0.1:2010") #IP à changer
-	time.sleep(3.0)
-	IvyBindMsg(on_msg, "(.*)")
-	test_pdv_nominal()
+	IvyStart("127.255.255.255:2010") #IP à changer
+	time.sleep(1.0)
+	IvyBindMsg(on_msg, "(.*)");test_time_init();test_pdv_nominal()
     
