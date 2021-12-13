@@ -28,23 +28,23 @@ CI=0.35 #Cost Index
 
 
 class Avion:
-	def __init__(self,alt,vitesse,Mach,config_physique,train,phi,gamma,PA,window,nx_lim,nz_lim,p_lim,vitesse_lim,vitesse_i,phi_lim,gamma_lim):#penser à virer tous les paramètres une fois tous les tests effectués et à tout mettre à 0 après
-		self.alt=alt
-		self.vitesse=vitesse#pas initialisé à 0
-		self.Mach=Mach#booléen
-		self.config_physique=config_physique #numéro de la configuration physique dans laquelle on se trouve (0,1,2,3
-		self.train=train#booléen
-		self.phi=phi
-		self.gamma=gamma
-		self.PA=PA#booléen
+	def __init__(self,window):#penser à virer tous les paramètres une fois tous les tests effectués et à tout mettre à 0 après
+		self.alt=0
+		self.vitesse=100*KT2MS#pas initialisé à 0
+		self.Mach=False#booléen
+		self.config_physique=1 #numéro de la configuration physique dans laquelle on se trouve (0,1,2,3
+		self.train=True#booléen
+		self.phi=0
+		self.gamma=0
+		self.PA=True#booléen
 		self.window=window
-		self.nz_lim=nz_lim
-		self.nx_lim=nx_lim
-		self.p_lim=p_lim
-		self.vitesse_lim=vitesse_lim
-		self.vitesse_i=vitesse_i
-		self.phi_lim=phi_lim
-		self.gamma_lim=gamma_lim
+		self.nz_lim=[0,0]
+		self.nx_lim=[0,0]
+		self.p_lim=[0,0]
+		self.vitesse_lim=230*KT2MS
+		self.vitesse_i=230*KT2MS
+		self.phi_lim=[0,0]
+		self.gamma_lim=[0,0]
 		
 	def update_sliders(self,config_physique,train):
 		self.config_physique=config_physique
@@ -192,48 +192,6 @@ class Avion:
 		self.vitesse_limite()
 
 
-		
-			
-			
-
-if __name__=='__main__':
-	window=None
-	for i in range(0,5):
-		print(i)
-		A320=Avion(25000*FT2M,100*KT2MS,False,i,False,29*DEG2RAD,55*DEG2RAD,True,window,0,0,0,0,0,0,0)
-		print("alt=",A320.alt/FT2M)
-		print("vitesse=",A320.vitesse/KT2MS)
-		print("Config_physique=",A320.config_physique)
-		print("train=",A320.train)
-		print("vitesse_lim=",A320.vitesse_lim)
-		A320.vitesse_limite()
-		print("vitesse_lim update=",A320.vitesse_lim/KT2MS)
-		print("Mach=",A320.Mach)
-		T = T0 - 6.5 * (A320.alt / 1000)
-		a = sqrt(gamma_constante * R * T)
-		print(A320.vitesse_lim/a)
-		print("phi=",A320.phi/DEG2RAD)
-		print("gamma=",A320.gamma)
-		print("nz_limites=",A320.nz_lim)
-		A320.nz_limites()
-		print("nz_limites update=",A320.nz_lim)
-		print("nx_lim=",A320.nx_lim)
-		A320.nx_limites()
-		print("nx_lim update=",A320.nx_lim)
-		print("p_lim=",A320.p_lim)
-		A320.p_limites()
-		print("p_lim_update=",A320.p_lim[0]/DEG2RAD,A320.p_lim[1]/DEG2RAD)
-		print("vitesse_i=",A320.vitesse_i)
-		A320.vitesse_indiquee()
-		print("vitesse_i update=",A320.vitesse_i/KT2MS)
-		print(A320.vitesse_i/a)
-		print("phi-lim=",A320.phi_lim)
-		A320.phi_limites()
-		print("gamma_lim=",A320.gamma_lim)
-		A320.gamma_limites()
-		print("phi_lim update=",A320.phi_lim[0]/DEG2RAD,A320.phi_lim[1]/DEG2RAD)
-		print("gamma_lim update=",A320.gamma_lim[0]/DEG2RAD,A320.gamma_lim[1]/DEG2RAD)
-		print("PA=", A320.PA)
 
 #à faire : repasser tout en méthodes de la classe avion et rajouter les limites en paramètres
 		#faire la connexion avec les sliders de la fenêtre window
