@@ -54,6 +54,13 @@ def load_flight_plan(filename):
             listWpt.append(Waypoint(list[0],list[1],list[2],list[3],list[4]))
     return listWpt 
 
+def trianglevitesses(vwind, dirwind, vp, psi):
+    #calculer vecteur vsol
+    vsvec = [vp*math.cos(psi)+vwind*math.cos(math.pi*dirwind), vp*math.sin(psi)+vwind*math.sin(math.pi*dirwind)]
+    vsol = math.sqrt(vsvec[0]**2+vsvec[1]**2)
+    route = math.atan2(vsvec[1], vsvec[0])
+    return vsol, route
+
 class FGS:
     """
     L'objet contenant toutes les fonctions et variables du FGS
@@ -100,11 +107,12 @@ class FGS:
         Sortie Ivy: 1 message sur Ivy
             - Target
         """
-        def basculer_waiting_dirto(x, y, lastsent, psi):
+        def basculer_waiting_dirto(x, y, lastsent):
             #nope, dirtorequest
             self.waiting_dirto = True #devient VRAI car on envoie une dirto request
-            derive = math.asin(self.vwind*math.sin(route_actuelle-self.dirwind)/self.state_vector[3]*math.cos(fpa)) # calculer
-            route_actuelle = psi + derive
+            #derive = math.asin(self.vwind*math.sin(route_actuelle-self.dirwind)/self.state_vector[3]*math.cos(fpa)) # calculer
+            #route_actuelle = psi + derive
+            route_actuelle = trianglevitesses(self.vwind, self.dirwind, self.state_vector[3], self.state_vector[5])
             IvySendMsg("DirtoRequest")
             self.lastsenttarget = (x, y, lastsent[2], route_actuelle)
             IvySendMsg(TARGET_MSG.format(*lastsent))
@@ -159,7 +167,7 @@ class FGS:
                 #Envoyer la prochaine target
                 self.current_target_on_plan += 1
                 if self.current_target_on_plan >= len(self.flight_plan):
-                    basculer_waiting_dirto(x, y, self.lastsenttarget, psi)
+                    basculer_waiting_dirto(x, y, self.lastsenttarget)
                 else:
                     passer_wpt_suiv()
             else:
@@ -176,7 +184,7 @@ class FGS:
                         #ok, séquencer et, passer au suivant
                         self.current_target_on_plan += 1
                         if self.current_target_on_plan >= len(self.flight_plan):
-                            basculer_waiting_dirto(x, y, self.lastsenttarget, psi)
+                            basculer_waiting_dirto(x, y, self.lastsenttarget)
                         else:
                             passer_wpt_suiv()
                     else:
@@ -189,7 +197,7 @@ class FGS:
                     #ok, séquencer et, passer au suivant
                     self.current_target_on_plan += 1
                     if self.current_target_on_plan >= len(self.flight_plan):
-                        basculer_waiting_dirto(x, y, self.lastsenttarget, psi)
+                        basculer_waiting_dirto(x, y, self.lastsenttarget)
                     else:
                         passer_wpt_suiv()
                 else:
