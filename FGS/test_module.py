@@ -2,7 +2,7 @@ from ivy.std_api import *
 from fgs_module import *
 import time
 
-msgr = None
+msgr = "None"
 
 def on_msg(agent, *data):
 	global msgr
@@ -67,7 +67,7 @@ def reset_fgs(pdv):
 if __name__=="__main__":
 	IvyInit("FGS_test", "Ready")
 	IvyStart("127.0.0.1:2010") #IP à changer
-	time.sleep(1.0)
+	time.sleep(3.0)
 	IvyBindMsg(on_msg, "(.*)")
 	test_pdv_nominal()
     
