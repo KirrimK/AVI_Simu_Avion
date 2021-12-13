@@ -45,13 +45,10 @@ class Avion:
 		self.vitesse_i=vitesse_i
 		self.phi_lim=phi_lim
 		self.gamma_lim=gamma_lim
-		
+
+
 	def update_sliders(self,config_physique,train):
-		self.config_physique=config_physique
-		if train==0:
-				self.train=False
-		else:
-				self.train=True
+		pass
 	def update_PA(self):
 		self.PA=self.window.isAPOn
 	def vitesse_limite(self):
@@ -161,7 +158,7 @@ class Avion:
 	def phi_limites(self):
 		if abs(self.phi)>33*DEG2RAD:
 			self.PA=False
-			self.window.onButtonPushSignal(True)#on force l'AP à ê off c'est pour ça que l'on a true et pas false
+			#self.window.onButtonPushSignal(True)#on force l'AP à ê off c'est pour ça que l'on a true et pas false
 		if self.PA==False:
 			self.phi_lim=[-67*DEG2RAD,67*DEG2RAD]
 		else:
@@ -170,7 +167,7 @@ class Avion:
 	def gamma_limites(self):
 		if abs(self.gamma)>25*DEG2RAD:
 			self.PA=False
-			self.window.onButtonPushSignal(True)
+			#self.window.onButtonPushSignal(True)
 			self.phi_lim=[-67*DEG2RAD,67*DEG2RAD]
 		if self.PA==False:
 			self.gamma_lim=[-30*DEG2RAD,30*DEG2RAD]
