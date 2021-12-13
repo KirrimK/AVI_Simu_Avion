@@ -22,7 +22,7 @@ DEG2RAD = 0.01745329
 NM2M = 1852
 GRAV = 9.81
 
-DEBUG = False
+DEBUG = True
 
 def print_debug(text):
     if DEBUG:
@@ -237,7 +237,7 @@ class FGS:
                             passer_wpt_suiv(axe_next) #on continue le pdv en passant au wpt suivant
                     else: #si la distance de l'avion par rapport à la route est > à la distance maximale
                         print_debug("NO_LOUPE")
-                        basculer_waiting_dirto(x, y, self.lastsenttarget, psi) #on a fini le pdv et on applique la route de la dernière target
+                        basculer_waiting_dirto(x, y, self.lastsenttarget) #on a fini le pdv et on applique la route de la dernière target
                 else: #si ex < -seuil_ex
                     print_debug("NO_PASENCORE")
                     #pas encore dépassé le point
