@@ -21,7 +21,7 @@ class IvyRadio ():
         #Messages à envoyer : 
         self.infoLimites = "MM Limites vMax={} phiLim={} nxMin={} nxMax={} nzMin={} nzMax={} pLim={}"
         self.commandeVitesse = "MM Vc={}"
-        self.FCUAP = "FCUAP {}"
+        self.FCUAP = "FCUAP1 {}"
         self.commandeModeleNx = "APNxControl nx={}"
         self.commandeModeleNx = "APNzControl nz={}"
         self.commandeModelep = "APLatControl rollRate={}"
