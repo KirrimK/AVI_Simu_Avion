@@ -80,7 +80,7 @@ def reset_fgs(pdv):
 
 if __name__=="__main__":
 	IvyInit("FGS_test", "Ready")
-	IvyStart("127.0.0.1:2010") #IP à changer
+	IvyStart("127.255.255.255:2010") #IP à changer
 	time.sleep(1.0)
 	IvyBindMsg(on_msg, "(.*)")
 	test_time_init()
