@@ -33,18 +33,21 @@ class Window(QWidget):
         self.sliderTrainAtt.show()
         layout.addWidget (self.labelTrain)
         layout.addWidget (self.sliderTrainAtt)
-        #self.sliderTrainAtt.valueChanged.connect TODO
+        self.sliderTrainAtt.valueChanged.connect (self.onSliderValueChanged)
 
         self.sliderFlaps = QSlider (Qt.Vertical)
         self.sliderFlaps.setMaximum (4)
         self.sliderFlaps.setMinimum (0)
         self.sliderFlaps.setValue (1)
         layout.addWidget(self.sliderFlaps)
-        #self.sliderFlaps.valueChanged.connect TODO
+        self.sliderFlaps.valueChanged.connect (self.onSliderValueChanged)
         
         self.sliderFlaps.setTickInterval (1)
         self.sliderFlaps.show ()
 
+    def onSliderValueChanged (self):
+        self.avion.update_sliders(self.sliderFlaps.value(),self.sliderTrainAtt.value())
+        
     def onButtonPushSignal (self,forceOff):
         arme = self.isAPOn
         if forceOff:
