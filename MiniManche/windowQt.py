@@ -3,6 +3,7 @@ from PyQt5.QtCore import pyqtSignal, Qt
 from IvyCom import IvyRadio
 from backendManche import MancheRadio
 from limites import Avion
+from jukebox import Jukebox
 
 class Window(QWidget):
     def __init__(self):
@@ -18,6 +19,7 @@ class Window(QWidget):
         self.nzBrut = 0
         self.isAPOn = True
         self.show()
+        self.bruitages = Jukebox()
 
     def setupSliders (self):
         layout = QHBoxLayout()
@@ -44,12 +46,15 @@ class Window(QWidget):
         self.sliderFlaps.show ()
 
     def onButtonPushSignal (self,forceOff):
+        arme = self.isAPOn
         if forceOff:
             self.isAPOn = False
         elif (not self.isAPOn) and True:
             self.isAPOn = True
         else :
             self.isAPOn = False
+        if arme and not self.isAPOn:
+            self.bruitages.shutdownPA()
         self.radio.sendAPState(self.isAPOn)
         
     def onVecteurDEtatSignal (self,argTuple):
