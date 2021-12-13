@@ -183,6 +183,7 @@ class FGS:
             print("seuil_ex: {}".format(seuil_ex))
 
         print("axe_actuel: {}".format(axe_actuel))
+        print("axe_next: {}".format(axe_next))
 
         ex = math.cos(axe_actuel)*(x-wpt_target[1])+math.sin(axe_actuel)*(y-wpt_target[2])
         distance = math.sqrt((x-wpt_target[1])**2+(y-wpt_target[2])**2)
