@@ -126,13 +126,13 @@ class FGS:
             contrainte = z_wpt # la contrainte correspond à l'altitude
             if contrainte == -1: 
                 found_next = False #on initialise à faux le fait qu'on a pas encore trouvé la prochaine contrainte
-                for j in range(self.current_target_on_plan, len(self.flight_plan)):
-                    if self.flight_plan[j].infos()[3] != -1:
-                        found_next = True
+                for j in range(self.current_target_on_plan, len(self.flight_plan)): #pour chaque target dans le plan de vol
+                    if self.flight_plan[j].infos()[3] != -1: #si la contrainte de la target est -1
+                        found_next = True #on connaît maintenant la prochaine contrainte
                         contrainte = self.flight_plan[j].infos()[3]
                         break
-                if not found_next:
-                    contrainte = self.lastsenttarget[2]
+                if not found_next: #si on connaît déjà la prochaine contrainte
+                    contrainte = self.lastsenttarget[2] #contrainte vaut 
             self.targetmode = tgtmode
             self.lastsenttarget = (x_wpt, y_wpt, contrainte, axe_next)
             IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
