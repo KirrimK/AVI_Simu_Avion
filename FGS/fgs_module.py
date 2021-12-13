@@ -149,18 +149,18 @@ class FGS:
             seuil_ex = 0 #on initialise le seuil ex à O
         else: #si c'est le mode FlyBy
             if self.current_target_on_plan != 0: #si la target actuelle n'est pas le premier wpt
-                wpt_target_before = self.flight_plan[self.current_target_on_plan-1].infos()
-                axe_actuel = math.atan2(wpt_target[2]- wpt_target_before[2], wpt_target[1]- wpt_target_before[1])
-            else:
-                axe_actuel = math.atan2(wpt_target[2]-self.state_vector[1], wpt_target[1]-self.state_vector[0])
+                wpt_target_before = self.flight_plan[self.current_target_on_plan-1].infos() #on regarde le wpt précédent la target actuelle
+                axe_actuel = math.atan2(wpt_target[2]- wpt_target_before[2], wpt_target[1]- wpt_target_before[1]) #on calcule la route actuelle
+            else: #si c'est le premier wpt
+                axe_actuel = math.atan2(wpt_target[2]-self.state_vector[1], wpt_target[1]-self.state_vector[0]) #on calcule la route actuelle en utilisant les données du initstatevector
             
-            if self.current_target_on_plan != len(self.flight_plan)-1:
-                wpt_target_next = self.flight_plan[self.current_target_on_plan+1].infos()
-                axe_next = axe_actuel = math.atan2(wpt_target_next[2]- wpt_target[2], wpt_target_next[1]- wpt_target[1])
-            else:
-                axe_next = axe_actuel
-            delta_khi = axe_next - axe_actuel
-            seuil_ex = vp**2/(GRAV*math.tan(self.phi_max))*math.tan(delta_khi/2)
+            if self.current_target_on_plan != len(self.flight_plan)-1: #si la target actuelle n'est pas le dernier wpt
+                wpt_target_next = self.flight_plan[self.current_target_on_plan+1].infos() #on prend les données de la prochaine target
+                axe_next = axe_actuel = math.atan2(wpt_target_next[2]- wpt_target[2], wpt_target_next[1]- wpt_target[1]) #la route correspond à la route actuelle
+            else: #si la target est le dernier wpt
+                axe_next = axe_actuel #de même la prochain target correspond à la target actuelle
+            delta_khi = axe_next - axe_actuel #on calcule la variation de route
+            seuil_ex = vp**2/(GRAV*math.tan(self.phi_max))*math.tan(delta_khi/2) #on calcule le seuil ex
 
         ex = math.cos(x-wpt_target[1])+math.sin(y-wpt_target[2])
         distance = math.sqrt((x-wpt_target[1])**2+(y-wpt_target[2])**2)
