@@ -241,7 +241,7 @@ class FGS:
                 if (ex + seuil_ex > 0):
                     print("NF_PASSE")
                     #ok, séquencer et, passer au suivant
-                    self.current_target_on_plan += 1
+                    self.current_target_on_plan += 1 #on regarde la target suivante
                     if self.current_target_on_plan >= len(self.flight_plan):
                         print("NF_DERNIER_BASCULER")
                         basculer_waiting_dirto(x, y, self.lastsenttarget)
