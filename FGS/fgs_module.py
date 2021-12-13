@@ -108,8 +108,10 @@ class FGS:
         """Callback de StateVector
         Entrée Ivy:
             - x, y, z, vp, fpa, psi, phi: floats
-        Sortie Ivy: 1 message sur Ivy
+        Sortie Ivy: 1/2 message sur Ivy
             - Target
+            et optionnellement:
+            - DirtoRequest
         """
         def basculer_waiting_dirto(x, y, lastsent): #lastsent comme lastsenttarget
             #nope, dirtorequest
