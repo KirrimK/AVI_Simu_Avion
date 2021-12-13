@@ -45,12 +45,13 @@ class Avion:
 		self.vitesse_i=vitesse_i
 		self.phi_lim=phi_lim
 		self.gamma_lim=gamma_lim
-        def update_sliders(self,config_physique,train):
-                self.config_physique=config_physique
-                if train==0:
-                        self.train=False
-                else:
-                        self.train=True
+		
+	def update_sliders(self,config_physique,train):
+		self.config_physique=config_physique
+		if train==0:
+				self.train=False
+		else:
+				self.train=True
 	def update_PA(self):
 		self.PA=self.window.isAPOn
 	def vitesse_limite(self):
