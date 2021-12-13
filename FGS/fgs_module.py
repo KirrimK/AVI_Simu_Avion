@@ -11,6 +11,8 @@ DIRTO_REGEX = "DIRTO Wpt=(\S+)"
 TIMESTART_REGEX = "Time t=1.0"
 LIMITES_REGEX = "MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)"
 
+RESET_REGEX = "RESETFGS (\S+)" #uniquement à des fins de tests unitaires
+
 TARGET_MSG = "Target X={} Y={} Z={} Khi={}"
 
 FLYBY = "flyBy"
@@ -22,7 +24,8 @@ DEG2RAD = 0.01745329
 NM2M = 1852
 GRAV = 9.81
 
-DEBUG = True
+DEBUG = True #True printera sur la stdout
+ALLOW_RESET = True #True permettra de reset le FGS au pt de départ pdt l'exécution
 
 def print_debug(text):
     if DEBUG:
@@ -325,7 +328,8 @@ if __name__=="__main__":
     IvyInit("FGS", "Ready")
     IvyStart("127.255.255.255:2010") #IP à changer
     time.sleep(1.0)
-    IvyBindMsg(resetFGS, "RESETFGS (\S+)")
+    if ALLOW_RESET:
+        IvyBindMsg(resetFGS, RESET_REGEX)
     fgs = FGS("pdv.txt", 0, 0, 0.2389)
     IvyMainLoop()
 

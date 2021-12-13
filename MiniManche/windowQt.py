@@ -30,6 +30,7 @@ class Window(QWidget):
         self.sliderTrainAtt.setMinimum (0)
         self.sliderTrainAtt.setMaximum (1)
         self.sliderTrainAtt.setTickInterval (1)
+        self.sliderTrainAtt.setValue(1)
         self.sliderTrainAtt.show()
         layout.addWidget (self.labelTrain)
         layout.addWidget (self.sliderTrainAtt)
@@ -47,7 +48,7 @@ class Window(QWidget):
 
     def onSliderValueChanged (self):
         self.avion.update_sliders(self.sliderFlaps.value(),self.sliderTrainAtt.value())
-        
+
     def onButtonPushSignal (self,forceOff):
         arme = self.isAPOn
         if forceOff:
@@ -62,6 +63,9 @@ class Window(QWidget):
         
     def onVecteurDEtatSignal (self,argTuple):
         (x,y,alt,V,gamma,psi,phi) = argTuple
+        if V>self.avion.vitesse_lim:
+            self.bruitages.overSpeed ()
+
         self.avion.reception_vecteur_etat (alt,V,gamma,phi)
 
     def onCommandeAPSignal (self,argTuple):
