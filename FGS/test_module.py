@@ -2,12 +2,16 @@ from ivy.std_api import *
 from fgs_module import *
 import time
 
-msgr = "None"
+msgr = None
+
+f= None
 
 def on_msg(agent, *data):
 	global msgr
+	global f
 	msgr = data[0]
 	print(msgr)
+	f.write(msgr + '\n')
 
 def test_msg(msge,f):
 	global msgr
@@ -15,16 +19,19 @@ def test_msg(msge,f):
 	print(msge)
 	f.write(msge + '\n')
 	time.sleep(1.0)
-	f.write(msgr + '\n' + '\n')
+	f.write('\n')
 
 def test_pdv_nominal():
+	global f
 	f = open('test_pdv_nominal.txt','w')
 	
 	reset_fgs("pdv_test.txt")
+	#test start
+	test_msg("StateVector x=-10000 y=-10000 z=5000 Vp=128 fpa=0 psi=2.355 phi=0", f)
 	#test nominal
-	test_msg("StateVector x=10000 y=0 z=5000 Vp=128 fpa=0 psi=1.57 phi=0", f)
+	test_msg("StateVector x=10000 y=0 z=7000 Vp=128 fpa=0 psi=1.57 phi=0", f)
 	#test flyBy
-	test_msg("StateVector x=27000 y=0 z=5000 Vp=128 fpa=0 psi=1.57 phi=0", f)
+	test_msg("StateVector x=27000 y=0 z=7000 Vp=128 fpa=0 psi=1.57 phi=0", f)
 	#test overFly
 	test_msg("StateVector x=30000 y=29999 z=7000 Vp=128 fpa=0 psi=0 phi=0", f)
 	#test overFly
@@ -35,6 +42,7 @@ def test_pdv_nominal():
 	f.close()
 
 def test_pdv_selecte():
+	global f
 	f = open('test_pdv_selecte.txt','w')
 	
 	reset_fgs("pdv_test.txt")
@@ -53,6 +61,7 @@ def test_pdv_selecte():
 	f.close()
 
 def test_time_init():
+	global f
 	f = open('test_time_init.txt','w')
 	
 	reset_fgs("pdv_test.txt")
@@ -66,7 +75,10 @@ def reset_fgs(pdv):
 
 if __name__=="__main__":
 	IvyInit("FGS_test", "Ready")
-	IvyStart("127.255.255.255:2010") #IP à changer
+	IvyStart("127.0.0.1:2010") #IP à changer
 	time.sleep(1.0)
-	IvyBindMsg(on_msg, "(.*)");test_time_init();test_pdv_nominal()
+	IvyBindMsg(on_msg, "(.*)")
+	test_time_init()
+	test_pdv_nominal()
+	test_pdv_selecte()
     
