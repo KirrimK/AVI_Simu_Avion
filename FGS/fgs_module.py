@@ -31,7 +31,7 @@ def print_debug(text):
 InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 0, 0] #la vitesse de décollage est de 110 m/s
 
 def resetFGS(sender, *data):
-    print_debug("FGS reset")
+    print_debug("--------FGS HAS BEEN RESET--------")
     global fgs
     fgs.unbind()
     fgs = FGS(data[0],0,0,0.2389)
@@ -121,18 +121,20 @@ class FGS:
             et optionnellement:
             - DirtoRequest
         """
-        print_debug("-------ON_STATE_VECTOR--------")
+        print_debug("--------ON_STATE_VECTOR--------")
         print_debug(data)
         print_debug("\n")
         def basculer_waiting_dirto(x, y, lastsent): #lastsent comme lastsenttarget
             #nope, dirtorequest
+            print_debug("BASCULER_DIRTO:")
             self.waiting_dirto = True #devient VRAI car on envoie une dirto request
             #derive = math.asin(self.vwind*math.sin(route_actuelle-self.dirwind)/self.state_vector[3]*math.cos(fpa)) # calculer
             #route_actuelle = psi + derive
             route_actuelle = trianglevitesses(self.vwind, self.dirwind, self.state_vector[3], self.state_vector[5])
             IvySendMsg("DirtoRequest")
             self.lastsenttarget = (x, y, lastsent[2], route_actuelle) #on met à jour la dernière target envoyée
-            IvySendMsg(TARGET_MSG.format(*lastsent)) #on envoie la dernière target
+            print_debug(self.lastsenttarget)
+            IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
 
         def passer_wpt_suiv(axe_next):
             new_tgt = self.flight_plan[self.current_target_on_plan] #on définit une nouvelle target à partir du plan de vol (elle devient notre target actuelle)
