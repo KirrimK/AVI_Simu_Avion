@@ -113,13 +113,14 @@ class FGS:
         """
         def basculer_waiting_dirto(x, y, lastsent):
             #nope, dirtorequest
-            self.waiting_dirto = True #devient VRAI car on va envoyer une dirto request
-            derive = math.asin(self.vwind*math.sin(route_actuelle-self.dirwind)/self.state_vector[3]*math.cos(fpa)) # calculer
-            route_actuelle = psi + derive
-            IvySendMsg("DirtoRequest") #on envoie une dirto request
-            self.lastsenttarget = (x, y, lastsent[2], route_actuelle) #infos de la dernière target
-            IvySendMsg(TARGET_MSG.format(*lastsent)) # on envoie la dernière target
-        
+            self.waiting_dirto = True #devient VRAI car on envoie une dirto request
+            #derive = math.asin(self.vwind*math.sin(route_actuelle-self.dirwind)/self.state_vector[3]*math.cos(fpa)) # calculer
+            #route_actuelle = psi + derive
+            route_actuelle = trianglevitesses(self.vwind, self.dirwind, self.state_vector[3], self.state_vector[5])
+            IvySendMsg("DirtoRequest")
+            self.lastsenttarget = (x, y, lastsent[2], route_actuelle)
+            IvySendMsg(TARGET_MSG.format(*lastsent))
+
         def passer_wpt_suiv():
             new_tgt = self.flight_plan[self.current_target_on_plan] #on définit une nouvelle target à partir du plan de vol (elle devient notre target actuelle)
             _, x_wpt, y_wpt, z_wpt, tgtmode = new_tgt.infos() #on prend les infos de la target (infos dont on a besoin)
