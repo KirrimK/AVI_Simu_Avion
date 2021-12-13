@@ -24,15 +24,12 @@ class Window(QWidget):
     def setupSliders (self):
         layout = QHBoxLayout()
         self.setLayout (layout)
-        self.labelTrain = QLabel ()
-        self.labelTrain.setText ("Trains")
         self.sliderTrainAtt = QSlider (Qt.Vertical)
         self.sliderTrainAtt.setMinimum (0)
         self.sliderTrainAtt.setMaximum (1)
         self.sliderTrainAtt.setTickInterval (1)
         self.sliderTrainAtt.setValue(1)
         self.sliderTrainAtt.show()
-        layout.addWidget (self.labelTrain)
         layout.addWidget (self.sliderTrainAtt)
         self.sliderTrainAtt.valueChanged.connect (self.onSliderValueChanged)
 
@@ -65,7 +62,8 @@ class Window(QWidget):
         (x,y,alt,V,gamma,psi,phi) = argTuple
         if V>self.avion.vitesse_lim:
             self.bruitages.overSpeed ()
-
+        if alt <50 and not self.avion.train:
+            self.bruitage.pullUp()
         self.avion.reception_vecteur_etat (alt,V,gamma,phi)
 
     def onCommandeAPSignal (self,argTuple):
