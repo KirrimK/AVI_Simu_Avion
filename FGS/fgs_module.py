@@ -24,6 +24,10 @@ GRAV = 9.81
 
 InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 0, 0] #la vitesse de décollage est de 110 m/s
 
+def resetFGS(sender,  data):
+    global fgs
+    fgs.unbind()
+    fgs = FGS(data[0],0,0,0.2389)
 
 class Waypoint:
     """
@@ -269,9 +273,10 @@ class FGS:
 
 if __name__=="__main__":
     IvyInit("FGS", "Ready")
-    IvyStart("10.1.127.255:2010") #IP à changer
+    IvyStart("127.0.0.1:2010") #IP à changer
     time.sleep(1.0)
     fgs = FGS("pdv.txt")
+    IvyBindMsg(resetFGS, "RESETFGS (\S+)")
 
 ##### Pour référence future #####
 #IvySendMsg("")
