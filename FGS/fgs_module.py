@@ -102,8 +102,8 @@ class FGS:
         """
         def basculer_waiting_dirto(x, y, lastsent, psi):
             #nope, dirtorequest
-            self.waiting_dirto = True
-            derive = 0 # calculer
+            self.waiting_dirto = True #devient VRAI car on envoie une dirto request
+            derive = math.asin(self.vwind*math.sin(route_actuelle-self.dirwind)/self.state_vector[3]*math.cos(fpa)) # calculer
             route_actuelle = psi + derive
             IvySendMsg("DirtoRequest")
             self.lastsenttarget = (x, y, lastsent[2], route_actuelle)
