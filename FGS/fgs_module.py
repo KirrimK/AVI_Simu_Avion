@@ -22,10 +22,16 @@ DEG2RAD = 0.01745329
 NM2M = 1852
 GRAV = 9.81
 
+DEBUG = False
+
+def print_debug(text):
+    if DEBUG:
+        print(text)
+
 InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 0, 0] #la vitesse de décollage est de 110 m/s
 
 def resetFGS(sender, *data):
-    print("FGS reset\n")
+    print_debug("FGS reset\n")
     global fgs
     fgs.unbind()
     fgs = FGS(data[0],0,0,0.2389)
@@ -115,9 +121,9 @@ class FGS:
             et optionnellement:
             - DirtoRequest
         """
-        print("-------ON_STATE_VECTOR")
-        print(data)
-        print("\n")
+        print_debug("-------ON_STATE_VECTOR--------")
+        print_debug(data)
+        print_debug("\n")
         def basculer_waiting_dirto(x, y, lastsent): #lastsent comme lastsenttarget
             #nope, dirtorequest
             self.waiting_dirto = True #devient VRAI car on envoie une dirto request
@@ -151,106 +157,106 @@ class FGS:
         x, y, z, vp, fpa, psi, phi = self.state_vector
         #calculer le reculement du seuil en fonction du waypoint qui suit
         wpt_target = self.flight_plan[self.current_target_on_plan].infos() #on prend les infos de la target actuelle
-        print("WPT_target:")
-        print(wpt_target)
+        print_debug("WPT_target:")
+        print_debug(wpt_target)
         distance_max = 1*NM2M #on définit la distance maximale d'écart entre l'avion et la route
         
         if self.current_target_on_plan != 0: #si la target actuelle n'est pas le premier wpt
-            print("PASPREMIER")
+            print_debug("PASPREMIER")
             wpt_target_before = self.flight_plan[self.current_target_on_plan-1].infos() #on regarde le wpt précédent la target actuelle
-            print("WPT_before:")
-            print(wpt_target_before)
+            print_debug("WPT_before:")
+            print_debug(wpt_target_before)
             axe_actuel = math.atan2(wpt_target[1]- wpt_target_before[1], wpt_target[2]- wpt_target_before[2]) #on calcule la route actuelle
         else: #si c'est le premier wpt
-            print("PREMIER")
+            print_debug("PREMIER")
             axe_actuel = trianglevitesses(self.vwind, self.dirwind, vp, psi) #on calcule la route actuelle en utilisant les données du initstatevector
         if self.current_target_on_plan != len(self.flight_plan)-1: #si la target actuelle n'est pas le dernier wpt
-            print("PASDERNIER")
+            print_debug("PASDERNIER")
             wpt_target_next = self.flight_plan[self.current_target_on_plan+1].infos() #on prend les données de la prochaine target
-            print("WPT_next:")
-            print(wpt_target_next)
+            print_debug("WPT_next:")
+            print_debug(wpt_target_next)
             axe_next = math.atan2(wpt_target_next[1]- wpt_target[1], wpt_target_next[2]- wpt_target[2]) #la route correspond à la route actuelle
         else: #si la target est le dernier wpt
-            print("DERNIER")
+            print_debug("DERNIER")
             axe_next = axe_actuel #de même la prochain target correspond à la target actuelle
         
         if self.targetmode == OVERFLY: 
-            print("seuil_ex: 0(overfly)")
+            print_debug("seuil_ex: 0(overfly)")
             seuil_ex = 0 #on initialise le seuil ex à O
         else: #si c'est le mode FlyBy
             delta_khi = axe_next - axe_actuel #on calcule la variation de route
             seuil_ex = vp**2/(GRAV*math.tan(self.phi_max))*math.tan(delta_khi/2) #on calcule le seuil ex
-            print("seuil_ex: {}".format(seuil_ex))
+            print_debug("seuil_ex: {}".format(seuil_ex))
 
-        print("axe_actuel: {}".format(axe_actuel))
-        print("axe_next: {}".format(axe_next))
+        print_debug("axe_actuel: {}".format(axe_actuel))
+        print_debug("axe_next: {}".format(axe_next))
 
         ex = math.sin(axe_actuel)*(x-wpt_target[1])+math.cos(axe_actuel)*(y-wpt_target[2])
         distance = math.sqrt((x-wpt_target[1])**2+(y-wpt_target[2])**2)#on calcule la distance de l'avion par rapport à la target
-        print("ex {} distance {}".format(ex, distance))
+        print_debug("ex {} distance {}".format(ex, distance))
 
         #si en mode dirto
         if self.dirto_on: #si dirto demandé
-            print("DIRTO_ON")
+            print_debug("DIRTO_ON")
             #dirto flyby par défaut
             if (ex >= seuil_ex):
-                print("D_PASSE")
+                print_debug("D_PASSE")
                 self.dirto_on = False
                 #Envoyer la prochaine target
                 self.current_target_on_plan += 1
                 if self.current_target_on_plan >= len(self.flight_plan): #si l'indice de la target actuelle est supérieur à la longueur du pdv
-                    print("D_BASCULEWAIT")
+                    print_debug("D_BASCULEWAIT")
                     basculer_waiting_dirto(x, y, self.lastsenttarget) #on a fini le pdv et on applique la route de la dernière target
                 else: #sinon
-                    print("D_NEXT")
+                    print_debug("D_NEXT")
                     passer_wpt_suiv(axe_next) #on passe au wpt suivant
             else: #si ex < -seuil_ex
-                print("D_PASENCORE")
+                print_debug("D_PASENCORE")
                 IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
         elif self.waiting_dirto: #si on attend une dirto
-            print("WAITING")
+            print_debug("WAITING")
             #en attente de dirto, maintenir l'avion sur axe lorsque dépassé point sans séquencer
             IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
         #Sinon
         else: #si dirto pas demandé et si pas attente de dirto
-            print("NORMAL")
+            print_debug("NORMAL")
             if self.targetmode == OVERFLY:
-                print("N_OVERFLY")
+                print_debug("N_OVERFLY")
                 if (ex > seuil_ex):
-                    print("NO_PASSE")
+                    print_debug("NO_PASSE")
                     #vérifier si distance inf à distmax
                     if (distance < distance_max): #si la distance de l'avion par rapport à la route est < à la distance_max
-                        print("NO_PROCHE")
+                        print_debug("NO_PROCHE")
                         #ok, séquencer et, passer au suivant
                         self.current_target_on_plan += 1 #on regarde la target suivante
                         if self.current_target_on_plan >= len(self.flight_plan): #si l'indice de la target actuelle est supérieur à la longueur du pdv
-                            print("NO_DERNIER_BASCULERWAITING")
+                            print_debug("NO_DERNIER_BASCULERWAITING")
                             basculer_waiting_dirto(x, y, self.lastsenttarget) #on a fini le pdv et on applique la route de la dernière target
                         else: #sinon
-                            print("NO_NEXT")
+                            print_debug("NO_NEXT")
                             passer_wpt_suiv(axe_next) #on continue le pdv en passant au wpt suivant
                     else: #si la distance de l'avion par rapport à la route est > à la distance maximale
-                        print("NO_LOUPE")
+                        print_debug("NO_LOUPE")
                         basculer_waiting_dirto(x, y, self.lastsenttarget, psi) #on a fini le pdv et on applique la route de la dernière target
                 else: #si ex < -seuil_ex
-                    print("NO_PASENCORE")
+                    print_debug("NO_PASENCORE")
                     #pas encore dépassé le point
                     IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
             else: #si le mode est FlyBy
-                print("FLYBY")
+                print_debug("FLYBY")
                 if (ex >= seuil_ex):
-                    print("NF_PASSE")
+                    print_debug("NF_PASSE")
                     #ok, séquencer et, passer au suivant
                     self.current_target_on_plan += 1 #on regarde la target suivante
                     if self.current_target_on_plan >= len(self.flight_plan):
-                        print("NF_DERNIER_BASCULER")
+                        print_debug("NF_DERNIER_BASCULER")
                         basculer_waiting_dirto(x, y, self.lastsenttarget)
                     else:
-                        print("NF_PASDERNIER_NEXT")
+                        print_debug("NF_PASDERNIER_NEXT")
                         passer_wpt_suiv(axe_next)
                 else:
                     #pas encore
-                    print("NF_PASENCORE")
+                    print_debug("NF_PASENCORE")
                     IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
 
     def on_dirto(self, sender, *data):
