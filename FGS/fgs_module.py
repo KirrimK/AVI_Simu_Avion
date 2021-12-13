@@ -75,18 +75,18 @@ class FGS:
         Arguments:
             - filename: string
         """
-        self.dirto_on = False
-        self.waiting_dirto = False
-        self.dirto_target_number = 0
+        self.dirto_on = False #flag qui indique si on est en mode dirto ou non
+        self.waiting_dirto = False #flag qui indique si on est en attente d'un dirto
+        self.dirto_target_number = 0 #numéro du WPT dans le PDV en target du dirto
         self.phi_max = 0 #radians
-        self.flight_plan = load_flight_plan(filename)
-        self.current_target_on_plan = 0
-        self.lastsenttarget = (0, 0, 0, 0)
+        self.flight_plan = load_flight_plan(filename) #list of Waypoint
+        self.current_target_on_plan = 0 #numéro du WPT dans le PDV actuellement en target
+        self.lastsenttarget = (0, 0, 0, 0) #x, y, z, contrainte
         self.targetmode = FLYBY
-        self.vwind = vwind 
-        self.dirwind = dirwind
-        self.dm = MagneticDeclination
-        self.state_vector = InitStateVector.copy()
+        self.vwind = vwind #m/s
+        self.dirwind = dirwind #radians
+        self.dm = MagneticDeclination #radians
+        self.state_vector = InitStateVector.copy() #x, y, z, vp, fpa, psi, phi
         self.idbind1 = IvyBindMsg(self.on_state_vector, STATEVEC_REGEX)
         self.idbind2 = IvyBindMsg(self.on_dirto, DIRTO_REGEX)
         self.idbind3 = IvyBindMsg(self.on_time_start, TIMESTART_REGEX)
@@ -275,7 +275,7 @@ if __name__=="__main__":
     IvyInit("FGS", "Ready")
     IvyStart("127.0.0.1:2010") #IP à changer
     time.sleep(1.0)
-    fgs = FGS("pdv.txt")
+    fgs = FGS("pdv.txt", 0, 0, 0.2389)
     IvyBindMsg(resetFGS, "RESETFGS (\S+)")
 
 ##### Pour référence future #####
