@@ -129,7 +129,7 @@ class FGS:
             _, x_wpt, y_wpt, z_wpt, tgtmode = new_tgt.infos() #on prend les infos de la target (infos dont on a besoin)
             contrainte = z_wpt # la contrainte correspond à l'altitude
             if contrainte == -1: 
-                found_next = False #on initialise à FAUX le fait qu'on a pas encore trouvé la prochaine contrainte
+                found_next = False #on initialise à FAUX le fait qu'on n'ait pas encore trouvé la prochaine contrainte
                 for j in range(self.current_target_on_plan, len(self.flight_plan)): #pour chaque target dans le plan de vol
                     if self.flight_plan[j].infos()[3] != -1: #si la contrainte de la target est -1
                         found_next = True #on connaît maintenant la prochaine contrainte
@@ -167,7 +167,7 @@ class FGS:
         distance = math.sqrt((x-wpt_target[1])**2+(y-wpt_target[2])**2) #distance de l'avion par rapport à la target actuelle
 
         #si en mode dirto
-        if self.dirto_on: #si dirto
+        if self.dirto_on: #si dirto demandé
             #dirto flyby par défaut
             if (ex > -seuil_ex):
                 self.dirto_on
@@ -219,34 +219,31 @@ class FGS:
         #le dirto est un raccourci dans le PDV
         #dirto flyby par défaut
         (dirto_wpt) = data
-        if self.waiting_dirto:
-            self.waiting_dirto = False
-        #chercher le WPT dans la liste des WPTs non séquencés, via recherche linéaire
+        if self.waiting_dirto: #si dirto demandé
+            self.waiting_dirto = False #on modifie le waiting_dirto à FALSE car on n'est plus en attente d'un dirto
+        #chercher le wpt dans la liste des wpt non séquencés, via recherche linéaire
         for i in range(self.current_target_on_plan%len(self.flight_plan), len(self.flight_plan)):
             if self.flight_plan[i].name() == dirto_wpt:
                 #get les infos du Wpt
-                _, x_wpt, y_wpt, z_wpt, _ = self.flight_plan[i].infos()
+                _, x_wpt, y_wpt, z_wpt, _ = self.flight_plan[i].infos() #on prend les infos de la target actuelle
                 #calculer la direction à mettre
-                route = math.atan2(y_wpt-self.state_vector[1], x_wpt-self.state_vector[0])
-                #trouver la prochaine contrainte d'altitude, si il n'y en a pas, garder la plus récente
+                route = math.atan2(y_wpt-self.state_vector[1], x_wpt-self.state_vector[0]) #on calcule la route 
+                #trouver la prochaine contrainte d'altitude, s'il n'y en a pas, garder la plus récente
                 contrainte = z_wpt
                 if contrainte == -1:
-                    found_next = False
-                    for j in range(i, len(self.flight_plan)):
-                        if self.flight_plan[j].infos()[3] != -1:
-                            contrainte = self.flight_plan[j].infos()[3]
+                    found_next = False #on initialise à FAUX le fait qu'on n'ait pas encore trouvé la prochaine contrainte
+                    for j in range(i, len(self.flight_plan)): #pour chaque wpt dans le pdv
+                        if self.flight_plan[j].infos()[3] != -1: #si l'altitude z du wpt j est égale à -1
+                            contrainte = self.flight_plan[j].infos()[3] #on met à jour la contrainte avec cette valeur -1
                             break
-                    if not found_next:
-                        contrainte = self.lastsenttarget[2]
+                    if not found_next: #si on a la prochaine contrainte
+                        contrainte = self.lastsenttarget[2] #on met à jour la contrainte avec celle de la dernière target
                 #sauvegarder le message à envoyer
-                self.lastsenttarget = (x_wpt, y_wpt, contrainte, route)
-                self.targetmode = FLYBY
-                #mettre à jour le numéro de la target en cours
-                self.current_target_on_plan = i
-                #activer le mode dirto
-                self.dirto_on = True
-                #envoyer le 1er msg
-                IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
+                self.lastsenttarget = (x_wpt, y_wpt, contrainte, route) #on met à jour la dernière target
+                self.targetmode = FLYBY #on met le mode de la target en FlyBY
+                self.current_target_on_plan = i #on met à jour le numéro de la target en cours
+                self.dirto_on = True #on active le mode dirto
+                IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
                 break
         
 
