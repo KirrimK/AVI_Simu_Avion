@@ -24,7 +24,7 @@ GRAV = 9.81
 
 InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 0, 0] #la vitesse de décollage est de 110 m/s
 
-def resetFGS(sender,  data):
+def resetFGS(sender, *data):
     print("FGS reset\n")
     global fgs
     fgs.unbind()
@@ -36,9 +36,9 @@ class Waypoint:
     """
     def __init__(self, name, x, y, z, mode):
         self.nom = name #string
-        self.x = x #float
-        self.y = y #float
-        self.z = z #float
+        self.x = float(x) #float
+        self.y = float(y) #float
+        self.z = float(z) #float
         self.mode = mode #string: "overFly" | "flyBy"
 
     def name(self):
@@ -55,8 +55,9 @@ def load_flight_plan(filename):
     listWpt = []
     with open(filename,"r") as f:
         for ligne in f:
-            list = ligne.split()
-            listWpt.append(Waypoint(list[0],list[1],list[2],list[3],list[4]))
+            if ligne not in ["", "WPTNAME X Y Z MODE"]:
+                list = ligne.split()
+                listWpt.append(Waypoint(list[0],list[1],list[2],list[3],list[4]))
     return listWpt 
 
 def trianglevitesses(vwind, dirwind, vp, psi):
@@ -79,7 +80,7 @@ class FGS:
         self.dirto_on = False #flag qui indique si on est en mode dirto ou non
         self.waiting_dirto = False #flag qui indique si on est en attente d'un dirto
         self.dirto_target_number = 0 #numéro du WPT dans le PDV en target du dirto
-        self.phi_max = 0 #radians
+        self.phi_max = 27*DEG2RAD #radians (valeur par défaut pour éviter div/zero)
         self.flight_plan = load_flight_plan(filename) #list of Waypoint
         self.current_target_on_plan = 0 #numéro du WPT dans le PDV actuellement en target
         self.lastsenttarget = (0, 0, 0, 0) #x, y, contrainte, route
@@ -114,6 +115,9 @@ class FGS:
             et optionnellement:
             - DirtoRequest
         """
+        print("-------ON_STATE_VECTOR")
+        print(data)
+        print("\n")
         def basculer_waiting_dirto(x, y, lastsent): #lastsent comme lastsenttarget
             #nope, dirtorequest
             self.waiting_dirto = True #devient VRAI car on envoie une dirto request
@@ -124,12 +128,12 @@ class FGS:
             self.lastsenttarget = (x, y, lastsent[2], route_actuelle) #on met à jour la dernière target envoyée
             IvySendMsg(TARGET_MSG.format(*lastsent)) #on envoie la dernière target
 
-        def passer_wpt_suiv(): #passer au wpt suivant
+        def passer_wpt_suiv(axe_next):
             new_tgt = self.flight_plan[self.current_target_on_plan] #on définit une nouvelle target à partir du plan de vol (elle devient notre target actuelle)
             _, x_wpt, y_wpt, z_wpt, tgtmode = new_tgt.infos() #on prend les infos de la target (infos dont on a besoin)
             contrainte = z_wpt # la contrainte correspond à l'altitude
             if contrainte == -1: 
-                found_next = False #on initialise à FAUX le fait qu'on a pas encore trouvé la prochaine contrainte
+                found_next = False #on initialise à FAUX le fait qu'on n'ait pas encore trouvé la prochaine contrainte
                 for j in range(self.current_target_on_plan, len(self.flight_plan)): #pour chaque target dans le plan de vol
                     if self.flight_plan[j].infos()[3] != -1: #si la contrainte de la target est -1
                         found_next = True #on connaît maintenant la prochaine contrainte
@@ -142,72 +146,112 @@ class FGS:
             IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
 
         #mettre à jour les infos connues sur l'avion (unpack data)
-        self.state_vector = [x, y, z, vp, fpa, psi, phi] = data
+        x, y, z, vp, fpa, psi, phi = data
+        self.state_vector = [float(x), float(y), float(z), float(vp), float(fpa), float(psi), float(phi)]
+        x, y, z, vp, fpa, psi, phi = self.state_vector
         #calculer le reculement du seuil en fonction du waypoint qui suit
         wpt_target = self.flight_plan[self.current_target_on_plan].infos() #on prend les infos de la target actuelle
+        print("WPT_target:")
+        print(wpt_target)
         distance_max = 1*NM2M #on définit la distance maximale d'écart entre l'avion et la route
+        
+        if self.current_target_on_plan != 0: #si la target actuelle n'est pas le premier wpt
+            print("PASPREMIER")
+            wpt_target_before = self.flight_plan[self.current_target_on_plan-1].infos() #on regarde le wpt précédent la target actuelle
+            print("WPT_before:")
+            print(wpt_target_before)
+            axe_actuel = math.atan2(wpt_target[2]- wpt_target_before[2], wpt_target[1]- wpt_target_before[1]) #on calcule la route actuelle
+        else: #si c'est le premier wpt
+            print("PREMIER")
+            axe_actuel = math.atan2(wpt_target[2]-self.state_vector[1], wpt_target[1]-self.state_vector[0]) #on calcule la route actuelle en utilisant les données du initstatevector
+        if self.current_target_on_plan != len(self.flight_plan)-1: #si la target actuelle n'est pas le dernier wpt
+            print("PASDERNIER")
+            wpt_target_next = self.flight_plan[self.current_target_on_plan+1].infos() #on prend les données de la prochaine target
+            print("WPT_next:")
+            print(wpt_target_next)
+            axe_next = axe_actuel = math.atan2(wpt_target_next[2]- wpt_target[2], wpt_target_next[1]- wpt_target[1]) #la route correspond à la route actuelle
+        else: #si la target est le dernier wpt
+            print("DERNIER")
+            axe_next = axe_actuel #de même la prochain target correspond à la target actuelle
+        
         if self.targetmode == OVERFLY: 
+            print("seuil_ex: 0(overfly)")
             seuil_ex = 0 #on initialise le seuil ex à O
         else: #si c'est le mode FlyBy
-            if self.current_target_on_plan != 0: #si la target actuelle n'est pas le premier wpt
-                wpt_target_before = self.flight_plan[self.current_target_on_plan-1].infos() #on regarde le wpt précédent la target actuelle
-                axe_actuel = math.atan2(wpt_target[2]- wpt_target_before[2], wpt_target[1]- wpt_target_before[1]) #on calcule la route actuelle
-            else: #si c'est le premier wpt
-                axe_actuel = math.atan2(wpt_target[2]-self.state_vector[1], wpt_target[1]-self.state_vector[0]) #on calcule la route actuelle en utilisant les données du initstatevector
-            
-            if self.current_target_on_plan != len(self.flight_plan)-1: #si la target actuelle n'est pas le dernier wpt
-                wpt_target_next = self.flight_plan[self.current_target_on_plan+1].infos() #on prend les données de la prochaine target (on lit le pdv dans le sens inverse)
-                axe_next = axe_actuel = math.atan2(wpt_target_next[2]- wpt_target[2], wpt_target_next[1]- wpt_target[1]) #la route correspond à la route actuelle
-            else: #si la target est le dernier wpt
-                axe_next = axe_actuel #de même la route de la prochaine target correspond à celle de la target actuelle
-            delta_khi = axe_next - axe_actuel #on calcule la variation de route entre actuelle et suivante
+            delta_khi = axe_next - axe_actuel #on calcule la variation de route
             seuil_ex = vp**2/(GRAV*math.tan(self.phi_max))*math.tan(delta_khi/2) #on calcule le seuil ex
+            print("seuil_ex: {}".format(seuil_ex))
 
-        ex = math.cos(x-wpt_target[1])+math.sin(y-wpt_target[2]) #à définir
-        distance = math.sqrt((x-wpt_target[1])**2+(y-wpt_target[2])**2) #distance de l'avion par rapport à la target actuelle
+        print("axe_actuel: {}".format(axe_actuel))
+        print("axe_next: {}".format(axe_next))
+
+        ex = math.cos(axe_actuel)*(x-wpt_target[1])+math.sin(axe_actuel)*(y-wpt_target[2])
+        distance = math.sqrt((x-wpt_target[1])**2+(y-wpt_target[2])**2) #on calcule la distance de l'avion par rapport à la target
+        print("ex {} distance {}".format(ex, distance))
 
         #si en mode dirto
-        if self.dirto_on: #si dirto
+        if self.dirto_on: #si dirto demandé
+            print("DIRTO_ON")
             #dirto flyby par défaut
             if (ex > -seuil_ex):
+                print("D_PASSE")
                 self.dirto_on
                 #Envoyer la prochaine target
-                self.current_target_on_plan += 1 #on passe à la prochaine target
+                self.current_target_on_plan += 1
                 if self.current_target_on_plan >= len(self.flight_plan): #si l'indice de la target actuelle est supérieur à la longueur du pdv
+                    print("D_BASCULEWAIT")
                     basculer_waiting_dirto(x, y, self.lastsenttarget) #on a fini le pdv et on applique la route de la dernière target
-                else: #si l'indice de la target est inférieur à la longueur du pdv
-                    passer_wpt_suiv() #on passe au wpt suivante
+                else: #sinon
+                    print("D_NEXT")
+                    passer_wpt_suiv(axe_next) #on passe au wpt suivant
             else: #si ex < -seuil_ex
+                print("D_PASENCORE")
                 IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
-        elif self.waiting_dirto:
+        elif self.waiting_dirto: #si on attend une dirto
+            print("WAITING")
             #en attente de dirto, maintenir l'avion sur axe lorsque dépassé point sans séquencer
             IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
         #Sinon
-        else: #si pas d'attente de dirto
+        else: #si dirto pas demandé et si pas attente de dirto
+            print("NORMAL")
             if self.targetmode == OVERFLY:
+                print("N_OVERFLY")
                 if (ex > -seuil_ex):
+                    print("NO_PASSE")
                     #vérifier si distance inf à distmax
-                    if (distance < distance_max):
+                    if (distance < distance_max): #si la distance de l'avion par rapport à la route est < à la distance_max
+                        print("NO_PROCHE")
                         #ok, séquencer et, passer au suivant
-                        self.current_target_on_plan += 1 #on va regarder la target suivante
+                        self.current_target_on_plan += 1 #on regarde la target suivante
                         if self.current_target_on_plan >= len(self.flight_plan): #si l'indice de la target actuelle est supérieur à la longueur du pdv
+                            print("NO_DERNIER_BASCULERWAITING")
                             basculer_waiting_dirto(x, y, self.lastsenttarget) #on a fini le pdv et on applique la route de la dernière target
                         else: #sinon
-                            passer_wpt_suiv() #on passe au wpt suivant
-                    else:#si la distance est supérieur à la distance maximale
-                        basculer_waiting_dirto(x, y, self.lastsenttarget) #on applique la route de la dernière target
-                else: #si on n'a pas encore dépassé le point
+                            print("NO_NEXT")
+                            passer_wpt_suiv(axe_next) #on continue le pdv en passant au wpt suivant
+                    else: #si la distance de l'avion par rapport à la route est > à la distance maximale
+                        print("NO_LOUPE")
+                        basculer_waiting_dirto(x, y, self.lastsenttarget, psi) #on a fini le pdv et on applique la route de la dernière target
+                else: #si ex < -seuil_ex
+                    print("NO_PASENCORE")
+                    #pas encore dépassé le point
                     IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
             else: #si le mode est FlyBy
-                if (ex > -seuil_ex):
+                print("FLYBY")
+                if (ex + seuil_ex > 0):
+                    print("NF_PASSE")
                     #ok, séquencer et, passer au suivant
-                    self.current_target_on_plan += 1 #on va regarder la target suivante
-                    if self.current_target_on_plan >= len(self.flight_plan): #si l'indice de la target actuelle est supérieur à la longueur du pdv
-                        basculer_waiting_dirto(x, y, self.lastsenttarget) #on a fini le pdv et on applique la route de la dernière target
-                    else: #sinon
-                        passer_wpt_suiv() #on passe au wpt suivant
-                else: #si on n'a pas encore dépassé le point
-                    IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
+                    self.current_target_on_plan += 1
+                    if self.current_target_on_plan >= len(self.flight_plan):
+                        print("NF_DERNIER_BASCULER")
+                        basculer_waiting_dirto(x, y, self.lastsenttarget)
+                    else:
+                        print("NF_PASDERNIER_NEXT")
+                        passer_wpt_suiv(axe_next)
+                else:
+                    #pas encore
+                    print("NF_PASENCORE")
+                    IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
 
     def on_dirto(self, sender, *data):
         """Callback de DIRTO
@@ -219,39 +263,36 @@ class FGS:
         #le dirto est un raccourci dans le PDV
         #dirto flyby par défaut
         (dirto_wpt) = data
-        if self.waiting_dirto:
-            self.waiting_dirto = False
-        #chercher le WPT dans la liste des WPTs non séquencés, via recherche linéaire
+        if self.waiting_dirto: #si dirto demandé
+            self.waiting_dirto = False #on modifie le waiting_dirto à FALSE car on n'est plus en attente d'un dirto
+        #chercher le wpt dans la liste des wpt non séquencés, via recherche linéaire
         for i in range(self.current_target_on_plan%len(self.flight_plan), len(self.flight_plan)):
             if self.flight_plan[i].name() == dirto_wpt:
                 #get les infos du Wpt
-                _, x_wpt, y_wpt, z_wpt, _ = self.flight_plan[i].infos()
+                _, x_wpt, y_wpt, z_wpt, _ = self.flight_plan[i].infos() #on prend les infos de la target actuelle
                 #calculer la direction à mettre
-                route = math.atan2(y_wpt-self.state_vector[1], x_wpt-self.state_vector[0])
-                #trouver la prochaine contrainte d'altitude, si il n'y en a pas, garder la plus récente
+                route = math.atan2(y_wpt-self.state_vector[1], x_wpt-self.state_vector[0]) #on calcule la route 
+                #trouver la prochaine contrainte d'altitude, s'il n'y en a pas, garder la plus récente
                 contrainte = z_wpt
                 if contrainte == -1:
-                    found_next = False
-                    for j in range(i, len(self.flight_plan)):
-                        if self.flight_plan[j].infos()[3] != -1:
-                            contrainte = self.flight_plan[j].infos()[3]
+                    found_next = False #on initialise à FAUX le fait qu'on n'ait pas encore trouvé la prochaine contrainte
+                    for j in range(i, len(self.flight_plan)): #pour chaque wpt dans le pdv
+                        if self.flight_plan[j].infos()[3] != -1: #si l'altitude z du wpt j est égale à -1
+                            contrainte = self.flight_plan[j].infos()[3] #on met à jour la contrainte avec cette valeur -1
                             break
-                    if not found_next:
-                        contrainte = self.lastsenttarget[2]
+                    if not found_next: #si on a la prochaine contrainte
+                        contrainte = self.lastsenttarget[2] #on met à jour la contrainte avec celle de la dernière target
                 #sauvegarder le message à envoyer
-                self.lastsenttarget = (x_wpt, y_wpt, contrainte, route)
-                self.targetmode = FLYBY
-                #mettre à jour le numéro de la target en cours
-                self.current_target_on_plan = i
-                #activer le mode dirto
-                self.dirto_on = True
-                #envoyer le 1er msg
-                IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
+                self.lastsenttarget = (x_wpt, y_wpt, contrainte, route) #on met à jour la dernière target
+                self.targetmode = FLYBY #on met le mode de la target en FlyBY
+                self.current_target_on_plan = i #on met à jour le numéro de la target en cours
+                self.dirto_on = True #on active le mode dirto
+                IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
                 break
         
 
     def on_time_start(self, sender, *data):
-        """Callback de Time t=0.0
+        """Callback de Time t=1.0
         Entrée Ivy: Rien
         Sortie Ivy: 3 messages sur Ivy
             - InitStateVector
@@ -274,7 +315,7 @@ class FGS:
 
 if __name__=="__main__":
     IvyInit("FGS", "Ready")
-    IvyStart("127.0.0.1:2010") #IP à changer
+    IvyStart("127.255.255.255:2010") #IP à changer
     time.sleep(1.0)
     IvyBindMsg(resetFGS, "RESETFGS (\S+)")
     fgs = FGS("pdv.txt", 0, 0, 0.2389)
