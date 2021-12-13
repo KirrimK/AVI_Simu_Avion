@@ -50,10 +50,12 @@ def test_pdv_selecte():
 def test_time_init():
 	f = open('test_time_init.txt','w')
 	
-	
+def reset_fgs(pdv):
+    IvySendMsg("RESETFGS {}".format(pdv))
 
 if __name__=="__main__":
-	IvyInit("FGS", "Ready")
-	IvyStart("10.1.127.255:2010") #IP à changer
+	IvyInit("FGS_test", "Ready")
+	IvyStart("127.0.0.1:2010") #IP à changer
 	time.sleep(1.0)
-	IvyBindMessage(on_msg, "(.*)")
+	IvyBindMsg(on_msg, "(.*)");test_pdv_nominal()
+    
