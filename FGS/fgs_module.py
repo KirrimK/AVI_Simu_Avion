@@ -133,9 +133,9 @@ class FGS:
                         contrainte = self.flight_plan[j].infos()[3]
                         break
                 if not found_next: #si on connaît déjà la prochaine contrainte
-                    contrainte = self.lastsenttarget[2] #contrainte vaut 
-            self.targetmode = tgtmode
-            self.lastsenttarget = (x_wpt, y_wpt, contrainte, axe_next)
+                    contrainte = self.lastsenttarget[2] #contrainte vaut l'altitude z de la dernière target
+            self.targetmode = tgtmode #on applique aussi le mode de la target
+            self.lastsenttarget = (x_wpt, y_wpt, contrainte, axe_next) #on met à jour la dernière target envoyée
             IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
 
         #mettre à jour les infos connues sur l'avion (unpack data)
