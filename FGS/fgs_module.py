@@ -65,7 +65,7 @@ def trianglevitesses(vwind, dirwind, vp, psi):
     vsvec = [vp*math.cos(psi)+vwind*math.cos(math.pi*dirwind), vp*math.sin(psi)+vwind*math.sin(math.pi*dirwind)]
     vsol = math.sqrt(vsvec[0]**2+vsvec[1]**2)
     route = math.atan2(vsvec[1], vsvec[0])
-    return vsol, route
+    return route
 
 class FGS:
     """
@@ -160,16 +160,16 @@ class FGS:
             wpt_target_before = self.flight_plan[self.current_target_on_plan-1].infos() #on regarde le wpt précédent la target actuelle
             print("WPT_before:")
             print(wpt_target_before)
-            axe_actuel = math.atan2(wpt_target[2]- wpt_target_before[2], wpt_target[1]- wpt_target_before[1]) #on calcule la route actuelle
+            axe_actuel = math.atan2(wpt_target[1]- wpt_target_before[1], wpt_target[2]- wpt_target_before[2]) #on calcule la route actuelle
         else: #si c'est le premier wpt
             print("PREMIER")
-            axe_actuel = math.atan2(wpt_target[2]-self.state_vector[1], wpt_target[1]-self.state_vector[0]) #on calcule la route actuelle en utilisant les données du initstatevector
+            axe_actuel = trianglevitesses(self.vwind, self.dirwind, vp, psi) #on calcule la route actuelle en utilisant les données du initstatevector
         if self.current_target_on_plan != len(self.flight_plan)-1: #si la target actuelle n'est pas le dernier wpt
             print("PASDERNIER")
             wpt_target_next = self.flight_plan[self.current_target_on_plan+1].infos() #on prend les données de la prochaine target
             print("WPT_next:")
             print(wpt_target_next)
-            axe_next = axe_actuel = math.atan2(wpt_target_next[2]- wpt_target[2], wpt_target_next[1]- wpt_target[1]) #la route correspond à la route actuelle
+            axe_next = math.atan2(wpt_target_next[1]- wpt_target[1], wpt_target_next[2]- wpt_target[2]) #la route correspond à la route actuelle
         else: #si la target est le dernier wpt
             print("DERNIER")
             axe_next = axe_actuel #de même la prochain target correspond à la target actuelle
@@ -185,7 +185,7 @@ class FGS:
         print("axe_actuel: {}".format(axe_actuel))
         print("axe_next: {}".format(axe_next))
 
-        ex = math.cos(axe_actuel)*(x-wpt_target[1])+math.sin(axe_actuel)*(y-wpt_target[2])
+        ex = math.sin(axe_actuel)*(x-wpt_target[1])+math.cos(axe_actuel)*(y-wpt_target[2])
         distance = math.sqrt((x-wpt_target[1])**2+(y-wpt_target[2])**2)
         print("ex {} distance {}".format(ex, distance))
 
@@ -193,9 +193,9 @@ class FGS:
         if self.dirto_on:
             print("DIRTO_ON")
             #dirto flyby par défaut
-            if (ex > -seuil_ex):
+            if (ex >= seuil_ex):
                 print("D_PASSE")
-                self.dirto_on
+                self.dirto_on = False
                 #Envoyer la prochaine target
                 self.current_target_on_plan += 1
                 if self.current_target_on_plan >= len(self.flight_plan):
@@ -216,7 +216,7 @@ class FGS:
             print("NORMAL")
             if self.targetmode == OVERFLY:
                 print("N_OVERFLY")
-                if (ex > -seuil_ex):
+                if (ex > seuil_ex):
                     print("NO_PASSE")
                     #vérifier si distance inf à distmax
                     if (distance < distance_max):
@@ -238,7 +238,7 @@ class FGS:
                     IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
             else:
                 print("FLYBY")
-                if (ex + seuil_ex > 0):
+                if (ex >= seuil_ex):
                     print("NF_PASSE")
                     #ok, séquencer et, passer au suivant
                     self.current_target_on_plan += 1
