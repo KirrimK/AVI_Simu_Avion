@@ -7,5 +7,6 @@ class Jukebox ():
     def __init__(self):
         mixer.init()
         self.PAOff = mixer.Sound (path.join(".","data","PAOff.wav"))
+        self.overSpeed = mixer.Sound (path.join (".", "data", "overSpeed.wav"))
     def shutdownPA (self):
         self.PAOff.play()
