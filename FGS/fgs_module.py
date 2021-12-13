@@ -272,6 +272,7 @@ class FGS:
                 #calculer la direction à mettre
                 route = math.atan2(y_wpt-self.state_vector[1], x_wpt-self.state_vector[0])
                 #trouver la prochaine contrainte d'altitude, si il n'y en a pas, garder la plus récente
+                
                 contrainte = z_wpt
                 if contrainte == -1:
                     found_next = False
