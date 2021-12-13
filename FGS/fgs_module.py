@@ -189,27 +189,25 @@ class FGS:
                     #vérifier si distance inf à distmax
                     if (distance < distance_max):
                         #ok, séquencer et, passer au suivant
-                        self.current_target_on_plan += 1 #on passe à la target suivante
+                        self.current_target_on_plan += 1 #on va regarder la target suivante
                         if self.current_target_on_plan >= len(self.flight_plan): #si l'indice de la target actuelle est supérieur à la longueur du pdv
                             basculer_waiting_dirto(x, y, self.lastsenttarget) #on a fini le pdv et on applique la route de la dernière target
                         else: #sinon
                             passer_wpt_suiv() #on passe au wpt suivant
                     else:#si la distance est supérieur à la distance maximale
                         basculer_waiting_dirto(x, y, self.lastsenttarget) #on applique la route de la dernière target
-                else:
-                    #pas encore dépassé le point
-                    IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
+                else: #si on n'a pas encore dépassé le point
+                    IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
             else: #si le mode est FlyBy
-                if (ex + seuil_ex > 0):
+                if (ex > -seuil_ex):
                     #ok, séquencer et, passer au suivant
-                    self.current_target_on_plan += 1
-                    if self.current_target_on_plan >= len(self.flight_plan):
-                        basculer_waiting_dirto(x, y, self.lastsenttarget)
-                    else:
-                        passer_wpt_suiv()
-                else:
-                    #pas encore
-                    IvySendMsg(TARGET_MSG.format(*self.lastsenttarget))
+                    self.current_target_on_plan += 1 #on va regarder la target suivante
+                    if self.current_target_on_plan >= len(self.flight_plan): #si l'indice de la target actuelle est supérieur à la longueur du pdv
+                        basculer_waiting_dirto(x, y, self.lastsenttarget) #on a fini le pdv et on applique la route de la dernière target
+                    else: #sinon
+                        passer_wpt_suiv() #on passe au wpt suivant
+                else: #si on n'a pas encore dépassé le point
+                    IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
 
     def on_dirto(self, sender, *data):
         """Callback de DIRTO
