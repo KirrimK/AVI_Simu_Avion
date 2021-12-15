@@ -356,7 +356,7 @@ if __name__=="__main__":
     IvyStart("127.255.255.255:2010") #IP à changer
     time.sleep(1.0)
     IvyBindMsg(resetFGS, RESET_REGEX)
-    fgs = FGS("fpl_formaté.txt", 0, 0, 0.2389)
+    fgs = FGS("sf_pdv.txt", 0, 0, 0.2389)
     IvyMainLoop()
 
 ##### Pour référence future #####
