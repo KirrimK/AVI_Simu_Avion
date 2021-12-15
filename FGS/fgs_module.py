@@ -171,7 +171,9 @@ class FGS:
             print_debug(wpt_target)
             distance_max = 1*NM2M #on définit la distance maximale d'écart entre l'avion et la route
             
-            if self.current_target_on_plan != 0: #si la target actuelle n'est pas le premier wpt
+            if self.dirto_on:
+                axe_actuel = self.lastsenttarget[3]
+            elif self.current_target_on_plan != 0: #si la target actuelle n'est pas le premier wpt
                 print_debug("PASPREMIER")
                 wpt_target_before = self.flight_plan[self.current_target_on_plan-1].infos() #on regarde le wpt précédent la target actuelle
                 print_debug("WPT_before:")
@@ -180,6 +182,8 @@ class FGS:
             else: #si c'est le premier wpt
                 print_debug("PREMIER")
                 axe_actuel = trianglevitesses(self.vwind, self.dirwind, vp, psi) #on calcule la route actuelle en utilisant les données du initstatevector
+            
+            
             if self.current_target_on_plan != len(self.flight_plan)-1: #si la target actuelle n'est pas le dernier wpt
                 print_debug("PASDERNIER")
                 wpt_target_next = self.flight_plan[self.current_target_on_plan+1].infos() #on prend les données de la prochaine target
