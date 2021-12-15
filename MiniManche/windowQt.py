@@ -13,7 +13,7 @@ class Window(QWidget):
         self.setupSliders ()
 
         self.radio = IvyRadio()
-        #self.manche = MancheRadio(self)
+        self.manche = MancheRadio(self)
         self.avion = Avion (self)
         self.pBrut = 0
         self.nzBrut = 0
