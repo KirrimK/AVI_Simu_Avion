@@ -1,0 +1,5 @@
+PT0 0 0 -1 0 flyBy
+PT1 30000 0 5000 flyBy
+PT2 30000 30000 -1 flyBy
+PT3 0 30000 -1 flyBy
+PT4 0 0 -1 flyBy
