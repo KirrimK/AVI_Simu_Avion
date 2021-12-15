@@ -72,8 +72,12 @@ class Avion:
 				a=sqrt(gamma_constante*R*T)
 				self.vitesse_lim=0.82*a
 		if self.train==True and self.config_physique==0:
-			self.Mach=False
-			self.vitesse_lim=280*KT2MS
+			if self.alt < 10000*FT2M:
+				self.Mach=False
+				self.vitesse_lim=250*KT2MS
+			else:
+				self.Mach=False
+				self.vitesse_lim=280*KT2MS
 
 		if self.config_physique==1:
 			self.Mach=False
@@ -104,8 +108,12 @@ class Avion:
 				a=sqrt(gamma_constante*R*T)
 				self.vitesse_i=0.78*a
 		if self.train==True and self.config_physique==0:
-			self.Mach=False
-			self.vitesse_i=280*KT2MS
+			if self.alt < 10000*FT2M:
+				self.Mach=False
+				self.vitesse_lim=250*KT2MS
+			else:
+				self.Mach=False
+				self.vitesse_lim=280*KT2MS
 
 		if self.config_physique==1:
 			self.Mach=False

@@ -73,6 +73,17 @@ def test_time_init():
 	test_msg("Time t=1.0",f)
 	
 	f.close()
+
+def test_dirto():
+	global f
+	f = open('test_dirto.txt','w')
+	
+	reset_fgs("pdv_test.txt")
+	test_msg("StateVector x=-10000 y=10000 z=5000 Vp=128 fpa=0 psi=2.355 phi=0", f)
+	test_msg("StateVector x=10000 y=0 z=7000 Vp=128 fpa=0 psi=1.57 phi=0", f)
+	test_msg("DIRTO Wpt=WPT3",f)
+	
+	f.close()
 	
 def reset_fgs(pdv):
 	IvySendMsg("RESETFGS {}".format(pdv))
@@ -86,4 +97,4 @@ if __name__=="__main__":
 	test_time_init()
 	test_pdv_nominal()
 	test_pdv_selecte()
-    
+	test_dirto()
