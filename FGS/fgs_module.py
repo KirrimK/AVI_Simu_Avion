@@ -24,7 +24,7 @@ DEG2RAD = 0.01745329
 NM2M = 1852
 GRAV = 9.81
 
-DEBUG = True #True printera sur la stdout
+DEBUG = False #True printera sur la stdout
 ALLOW_RESET = False #True permettra de reset le FGS au pt de départ pdt l'exécution
 
 def print_debug(text):
@@ -341,6 +341,17 @@ class FGS:
 
 
 if __name__=="__main__":
+    #récup du pdv depuis la CLI
+    pdv_path = ""
+    if len(sys.argv) < 2:
+        print("Usage: python fgs_module.py <plandevol> <optionnel: (0: prod, 1: prints, 2: test noprint, 3:debug)>")
+        sys.exit(1)
+    if len(sys.argv) <= 2:
+        pdv_name = sys.argv[1]
+    if len(sys.argv) == 3:
+        DEBUG = (int(sys.argv[2])%2==1)
+        ALLOW_RESET = (int(sys.argv[2])>1)
+    #prints de l'état du débuguage
     if ALLOW_RESET:
         if DEBUG:
             print("Mode test")
