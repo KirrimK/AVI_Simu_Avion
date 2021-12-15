@@ -1,0 +1,5 @@
+WPT1 559 2333 2000 flyBy
+WPT2 1662 -2127 -1 overFly
+WPT3 -1299 -1724 -1 flyBy
+WPT4 -719 771 4000 flyBy
+WPT5 0 0 0 overFly
