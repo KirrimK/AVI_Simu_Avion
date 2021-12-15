@@ -11,7 +11,7 @@ class Jukebox ():
         self.tropBas = mixer.Sound (path.join(".","data","pullUp.wav"))
     def shutdownPA (self):
         self.PAOff.play()
-    def overSpeed (self):
+    def overSpeeed (self):
         self.overSpeed.play()
-    def pullUp(self):
-        self.pullUp.play()
+    def pulllUp(self):
+        self.tropBas.play()

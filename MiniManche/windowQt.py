@@ -21,6 +21,8 @@ class Window(QWidget):
         self.show()
         self.bruitages = Jukebox()
         self.radio.qtEmetteur.BoutonPousseSignal.connect (self.onButtonPushSignal)
+        self.radio.qtEmetteur.VecteurDEtatSignal.connect (self.onVecteurDEtatSignal)
+        self.radio.qtEmetteur.CommandeAPSignal.connect (self.onCommandeAPSignal)
         print ("Ready\n")
 
     def setupSliders (self):
@@ -63,10 +65,11 @@ class Window(QWidget):
     def onVecteurDEtatSignal (self,argTuple):
         (x,y,alt,V,gamma,psi,phi) = argTuple
         if V>self.avion.vitesse_lim:
-            self.bruitages.overSpeed ()
+            self.bruitages.overSpeeed ()
         if alt <50 and not self.avion.train:
-            self.bruitage.pullUp()
+            self.bruitages.pulllUp()
         self.avion.reception_vecteur_etat (alt,V,gamma,phi)
+        self.radio.sendSpeedCommand (self.avion.vitesse_i)
 
     def onCommandeAPSignal (self,argTuple):
         (nX, nZ, p)=argTuple
@@ -83,12 +86,18 @@ class Window(QWidget):
         nzMax = 2
         if self.nzBrut >0.1:
             nzCons = 1+(self.nzBrut)/(nzMax-1)
-        elif self.nzBrut >-0.1:
-            nzCons = 1 
-        else : 
+            if nzCons >nzMax:
+                nzCons = 1
+        elif self.nzBrut <-0.1:
             nzCons = 1 - (self.nzBrut)/(nzMin -1)
-        if self.pBrut<0.1 or self.pBrut >0.1:
-            pCons = 15 * 3.141592654 /180
+            if nzCons < nzMin :
+                nzCons = 1
+        else : 
+            nzCons = 1
+        if self.pBrut<-0.1 or self.pBrut >0.1:
+            pCons = 15 * 3.141592654 /180 * self.pBrut
+            if self.avion.p_lim [0]> pCons or self.avion.p_lim[1]<pCons:
+                pCons = 0
         else :
             pCons = 0
         return (nzCons,pCons)

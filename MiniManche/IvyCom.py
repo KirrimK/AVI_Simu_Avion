@@ -22,10 +22,10 @@ class IvyRadio ():
 
         #Messages à envoyer : 
         self.infoLimites = "MM Limites vMax={} phiLim={} nxMin={} nxMax={} nzMin={} nzMax={} pLim={}"
-        self.commandeVitesse = "MM Vc={}"
+        self.commandeVitesse = "MM VC={}"
         self.FCUAP = "FCUAP1 {}"
         self.commandeModeleNx = "APNxControl nx={}"
-        self.commandeModeleNx = "APNzControl nz={}"
+        self.commandeModeleNz = "APNzControl nz={}"
         self.commandeModelep = "APLatControl rollRate={}"
         self.qtEmetteur = objetQt ()
         IvyBindMsg (self.onMessage1, self.initialMessage)
@@ -47,9 +47,9 @@ class IvyRadio ():
         IvySendMsg(message)
 
         #Réactions aux messages
-    def onMessage1 (self, sender):
+    def onMessage1 (self, *args):
         self.sendAPState(True)
-        
+
     def onBoutonAPPush (self,sender,argManche = False):
         """Fonction appelée par un callback d'un message de l'interface ou par le manche."""
         if not argManche == True:
@@ -59,17 +59,17 @@ class IvyRadio ():
     def onRcvStateVector (self,sender,x,y,z,Vp,fpa,psi,phi):
         """Fonction appelée par un callback d'un message de l'interface.
         Les valeurs sont utilisées pour calculer les limites de commande."""
-        self.qtEmetteur.VecteurDEtatSignal.emit((x,y,z,Vp,fpa,psi,phi))
+        self.qtEmetteur.VecteurDEtatSignal.emit((float(x),float(y),float(z),float(Vp),float(fpa),float(psi),float(phi)))
 
     def onRcvAPCommand (self,sender,nx, nz, p):
         """Fonction appelée par une callback de message pilote automatique.
         Appelle l'envoie des valeurs approuvées par les limites de l'avion."""
-        self.qtEmetteur.CommandeAPSignal.emit ((nx, nz, p))
+        self.qtEmetteur.CommandeAPSignal.emit ((float(nx), float(nz), float(p)))
 
         #Envoi de messages
     def sendSpeedCommand (self, Vc):
         """Envoie une commande de vitesse managée à l'auto pilote."""
-        self.sendMessage
+        self.sendMessage (self.commandeVitesse.format(Vc))
 
     def sendAPState(self,isOn):
         """Envoie l'état de l'auto pilote. 
