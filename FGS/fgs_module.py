@@ -75,7 +75,7 @@ def load_flight_plan(filename):
 def trianglevitesses(vwind, dirwind, vp, psi):
     #calculer vecteur vsol
     vsvec = [vp*math.cos(psi)+vwind*math.cos(math.pi*dirwind), vp*math.sin(psi)+vwind*math.sin(math.pi*dirwind)]
-    vsol = math.sqrt(vsvec[0]**2+vsvec[1]**2)
+    #vsol = math.sqrt(vsvec[0]**2+vsvec[1]**2)
     route = math.atan2(vsvec[1], vsvec[0])
     return route
 
@@ -163,45 +163,51 @@ class FGS:
         x, y, z, vp, fpa, psi, phi = data
         self.state_vector = [float(x), float(y), float(z), float(vp), float(fpa), float(psi), float(phi)]
         x, y, z, vp, fpa, psi, phi = self.state_vector
-        #calculer le reculement du seuil en fonction du waypoint qui suit
-        wpt_target = self.flight_plan[self.current_target_on_plan].infos() #on prend les infos de la target actuelle
-        print_debug("WPT_target:")
-        print_debug(wpt_target)
-        distance_max = 1*NM2M #on définit la distance maximale d'écart entre l'avion et la route
         
-        if self.current_target_on_plan != 0: #si la target actuelle n'est pas le premier wpt
-            print_debug("PASPREMIER")
-            wpt_target_before = self.flight_plan[self.current_target_on_plan-1].infos() #on regarde le wpt précédent la target actuelle
-            print_debug("WPT_before:")
-            print_debug(wpt_target_before)
-            axe_actuel = math.atan2(wpt_target[1]- wpt_target_before[1], wpt_target[2]- wpt_target_before[2]) #on calcule la route actuelle
-        else: #si c'est le premier wpt
-            print_debug("PREMIER")
-            axe_actuel = trianglevitesses(self.vwind, self.dirwind, vp, psi) #on calcule la route actuelle en utilisant les données du initstatevector
-        if self.current_target_on_plan != len(self.flight_plan)-1: #si la target actuelle n'est pas le dernier wpt
-            print_debug("PASDERNIER")
-            wpt_target_next = self.flight_plan[self.current_target_on_plan+1].infos() #on prend les données de la prochaine target
-            print_debug("WPT_next:")
-            print_debug(wpt_target_next)
-            axe_next = math.atan2(wpt_target_next[1]- wpt_target[1], wpt_target_next[2]- wpt_target[2]) #la route correspond à la route actuelle
-        else: #si la target est le dernier wpt
-            print_debug("DERNIER")
-            axe_next = axe_actuel #de même la prochain target correspond à la target actuelle
-        
-        if self.targetmode == OVERFLY: 
-            print_debug("seuil_ex: 0(overfly)")
-            seuil_ex = 0 #on initialise le seuil ex à O
-        else: #si c'est le mode FlyBy
-            delta_khi = axe_next - axe_actuel #on calcule la variation de route
-            seuil_ex = vp**2/(GRAV*math.tan(self.phi_max))*math.tan(delta_khi/2) #on calcule le seuil ex
-            print_debug("seuil_ex: {}".format(seuil_ex))
+        if not self.waiting_dirto and not self.dirto_on:
+            #calculer le reculement du seuil en fonction du waypoint qui suit
+            wpt_target = self.flight_plan[self.current_target_on_plan].infos() #on prend les infos de la target actuelle
+            print_debug("WPT_target:")
+            print_debug(wpt_target)
+            distance_max = 1*NM2M #on définit la distance maximale d'écart entre l'avion et la route
+            
+            if self.current_target_on_plan != 0: #si la target actuelle n'est pas le premier wpt
+                print_debug("PASPREMIER")
+                wpt_target_before = self.flight_plan[self.current_target_on_plan-1].infos() #on regarde le wpt précédent la target actuelle
+                print_debug("WPT_before:")
+                print_debug(wpt_target_before)
+                axe_actuel = math.atan2(wpt_target[1]- wpt_target_before[1], wpt_target[2]- wpt_target_before[2]) #on calcule la route actuelle
+            else: #si c'est le premier wpt
+                print_debug("PREMIER")
+                axe_actuel = trianglevitesses(self.vwind, self.dirwind, vp, psi) #on calcule la route actuelle en utilisant les données du initstatevector
+            if self.current_target_on_plan != len(self.flight_plan)-1: #si la target actuelle n'est pas le dernier wpt
+                print_debug("PASDERNIER")
+                wpt_target_next = self.flight_plan[self.current_target_on_plan+1].infos() #on prend les données de la prochaine target
+                print_debug("WPT_next:")
+                print_debug(wpt_target_next)
+                axe_next = math.atan2(wpt_target_next[1]- wpt_target[1], wpt_target_next[2]- wpt_target[2]) #la route correspond à la route actuelle
+            else: #si la target est le dernier wpt
+                print_debug("DERNIER")
+                axe_next = axe_actuel #de même la prochain target correspond à la target actuelle
+            
+            if self.targetmode == OVERFLY: 
+                print_debug("seuil_ex: 0(overfly)")
+                seuil_ex = 0 #on initialise le seuil ex à O
+            else: #si c'est le mode FlyBy
+                delta_khi = abs(axe_next - axe_actuel) #on calcule la variation de route
+                if delta_khi >= math.pi * 0.5: #saturation en cas de demi tours
+                    delta_khi = math.pi * 0.5
+                seuil_ex = vp**2/(GRAV*math.tan(self.phi_max))*math.tan(delta_khi/2) #on calcule le seuil ex
+                print_debug("seuil_ex: {}".format(seuil_ex))
 
-        print_debug("axe_actuel: {}".format(axe_actuel))
-        print_debug("axe_next: {}".format(axe_next))
+            print_debug("axe_actuel: {}".format(axe_actuel))
+            print_debug("axe_next: {}".format(axe_next))
 
-        ex = math.sin(axe_actuel)*(x-wpt_target[1])+math.cos(axe_actuel)*(y-wpt_target[2])
-        distance = math.sqrt((x-wpt_target[1])**2+(y-wpt_target[2])**2)#on calcule la distance de l'avion par rapport à la target
-        print_debug("ex {} distance {}".format(ex, distance))
+            ex = math.sin(axe_actuel)*(x-wpt_target[1])+math.cos(axe_actuel)*(y-wpt_target[2])
+            distance = math.sqrt((x-wpt_target[1])**2+(y-wpt_target[2])**2)#on calcule la distance de l'avion par rapport à la target
+            print_debug("ex {} distance {}".format(ex, distance))
+        else:
+            print("Waiting DIRTO")
 
         #si en mode dirto
         if self.dirto_on: #si dirto demandé
@@ -230,7 +236,7 @@ class FGS:
             print_debug("NORMAL")
             if self.targetmode == OVERFLY:
                 print_debug("N_OVERFLY")
-                if (ex > seuil_ex):
+                if (ex > -seuil_ex):
                     print_debug("NO_PASSE")
                     #vérifier si distance inf à distmax
                     if (distance < distance_max): #si la distance de l'avion par rapport à la route est < à la distance_max
@@ -252,7 +258,7 @@ class FGS:
                     IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
             else: #si le mode est FlyBy
                 print_debug("FLYBY")
-                if (ex >= seuil_ex):
+                if (ex >= -seuil_ex):
                     print_debug("NF_PASSE")
                     #ok, séquencer et, passer au suivant
                     self.current_target_on_plan += 1 #on regarde la target suivante
@@ -276,7 +282,9 @@ class FGS:
         #pas de dirto sur un pt du pdv déjà séquencé
         #le dirto est un raccourci dans le PDV
         #dirto flyby par défaut
+        print("--------ON_DIRTO--------")
         (dirto_wpt) = data
+        print("Requested waypoint {}".format(dirto_wpt))
         if self.waiting_dirto: #si dirto demandé
             self.waiting_dirto = False #on modifie le waiting_dirto à FALSE car on n'est plus en attente d'un dirto
         #chercher le wpt dans la liste des wpt non séquencés, via recherche linéaire
@@ -301,6 +309,7 @@ class FGS:
                 self.targetmode = FLYBY #on met le mode de la target en FlyBY
                 self.current_target_on_plan = i #on met à jour le numéro de la target en cours
                 self.dirto_on = True #on active le mode dirto
+                print("DIRTO TO {}".format(self.lastsenttarget))
                 IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
                 break
         
