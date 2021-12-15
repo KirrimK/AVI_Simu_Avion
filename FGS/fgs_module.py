@@ -164,7 +164,7 @@ class FGS:
         self.state_vector = [float(x), float(y), float(z), float(vp), float(fpa), float(psi), float(phi)]
         x, y, z, vp, fpa, psi, phi = self.state_vector
         
-        if not self.waiting_dirto and not self.dirto_on:
+        if not self.waiting_dirto:
             #calculer le reculement du seuil en fonction du waypoint qui suit
             wpt_target = self.flight_plan[self.current_target_on_plan].infos() #on prend les infos de la target actuelle
             print_debug("WPT_target:")
@@ -283,7 +283,7 @@ class FGS:
         #le dirto est un raccourci dans le PDV
         #dirto flyby par défaut
         print("--------ON_DIRTO--------")
-        (dirto_wpt) = data
+        (dirto_wpt,) = data
         print("Requested waypoint {}".format(dirto_wpt))
         if self.waiting_dirto: #si dirto demandé
             self.waiting_dirto = False #on modifie le waiting_dirto à FALSE car on n'est plus en attente d'un dirto
