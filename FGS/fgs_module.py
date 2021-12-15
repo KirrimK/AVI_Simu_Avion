@@ -25,7 +25,7 @@ NM2M = 1852
 GRAV = 9.81
 
 DEBUG = True #True printera sur la stdout
-ALLOW_RESET = True #True permettra de reset le FGS au pt de départ pdt l'exécution
+ALLOW_RESET = False #True permettra de reset le FGS au pt de départ pdt l'exécution
 
 def print_debug(text):
     if DEBUG:
@@ -146,7 +146,7 @@ class FGS:
             new_tgt = self.flight_plan[self.current_target_on_plan] #on définit une nouvelle target à partir du plan de vol (elle devient notre target actuelle)
             _, x_wpt, y_wpt, z_wpt, tgtmode = new_tgt.infos() #on prend les infos de la target (infos dont on a besoin)
             contrainte = z_wpt # la contrainte correspond à l'altitude
-            if contrainte == -1: 
+            if contrainte < 0:
                 found_next = False #on initialise à FAUX le fait qu'on n'ait pas encore trouvé la prochaine contrainte
                 for j in range(self.current_target_on_plan, len(self.flight_plan)): #pour chaque target dans le plan de vol
                     if self.flight_plan[j].infos()[3] != -1: #si la contrainte de la target est -1
@@ -338,12 +338,12 @@ if __name__=="__main__":
             print("Débugging activé en mode production")
         else:
             print("Mode production")
-    
+
     IvyInit("FGS", "Ready")
     IvyStart("127.255.255.255:2010") #IP à changer
     time.sleep(1.0)
     IvyBindMsg(resetFGS, RESET_REGEX)
-    fgs = FGS("pdv.txt", 0, 0, 0.2389)
+    fgs = FGS("fpl_formaté.txt", 0, 0, 0.2389)
     IvyMainLoop()
 
 ##### Pour référence future #####
