@@ -18,6 +18,8 @@ class IvyRadio ():
         self.btnPousse = "^FCUAP1 push$"
         self.vecteurDEtat = "^StateVector x=(.+) y=(.+) z=(.+) Vp=(.+) fpa=(.+) psi=(.+) phi=(.+)$"
         self.commandeAutoPilote = "^AutoPilot nx=(.+) nz=(.+) rollRate=(.+)$"
+        self.initialMessage = "^InitStateVector"
+
         #Messages à envoyer : 
         self.infoLimites = "MM Limites vMax={} phiLim={} nxMin={} nxMax={} nzMin={} nzMax={} pLim={}"
         self.commandeVitesse = "MM Vc={}"
@@ -26,7 +28,7 @@ class IvyRadio ():
         self.commandeModeleNx = "APNzControl nz={}"
         self.commandeModelep = "APLatControl rollRate={}"
         self.qtEmetteur = objetQt ()
-
+        IvyBindMsg (self.onMessage1, self.initialMessage)
         IvyBindMsg (self.onBoutonAPPush, self.btnPousse)
         IvyBindMsg (self.onRcvStateVector, self.vecteurDEtat)
         IvyBindMsg (self.onRcvAPCommand, self.commandeAutoPilote)
@@ -45,8 +47,13 @@ class IvyRadio ():
         IvySendMsg(message)
 
         #Réactions aux messages
+    def onMessage1 (self, sender):
+        self.sendAPState(True)
+        
     def onBoutonAPPush (self,sender,argManche = False):
         """Fonction appelée par un callback d'un message de l'interface ou par le manche."""
+        if not argManche == True:
+            argManche = False
         self.qtEmetteur.BoutonPousseSignal.emit(argManche)
 
     def onRcvStateVector (self,sender,x,y,z,Vp,fpa,psi,phi):

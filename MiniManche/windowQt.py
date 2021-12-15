@@ -20,6 +20,8 @@ class Window(QWidget):
         self.isAPOn = True
         self.show()
         self.bruitages = Jukebox()
+        self.radio.qtEmetteur.BoutonPousseSignal.connect (self.onButtonPushSignal)
+        print ("Ready\n")
 
     def setupSliders (self):
         layout = QHBoxLayout()
