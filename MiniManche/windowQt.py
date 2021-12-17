@@ -13,7 +13,7 @@ class Window(QWidget):
         self.setupSliders ()
 
         self.radio = IvyRadio()
-        self.manche = MancheRadio(self)
+        #self.manche = MancheRadio(self)
         self.avion = Avion (self)
         self.pBrut = 0
         self.nzBrut = 0
@@ -70,6 +70,7 @@ class Window(QWidget):
             self.bruitages.pulllUp()
         self.avion.reception_vecteur_etat (alt,V,gamma,phi)
         self.radio.sendSpeedCommand (self.avion.vitesse_i)
+        self.radio.sendLimitsInfo(self.avion.vitesse_lim,self.avion.phi_lim[1],self.avion.nx_lim[0],self.avion.nx_lim[1],self.avion.nz_lim[0],self.avion.nz_lim[1],self.avion.p_lim[1])
 
     def onCommandeAPSignal (self,argTuple):
         (nX, nZ, p)=argTuple
