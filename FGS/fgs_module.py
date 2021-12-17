@@ -1,5 +1,6 @@
 # FGS_module
 
+import sys, os
 from ivy.std_api import *
 import time
 import math
@@ -24,7 +25,7 @@ DEG2RAD = 0.01745329
 NM2M = 1852
 GRAV = 9.81
 
-DEBUG = True #True printera sur la stdout
+DEBUG = False #True printera sur la stdout
 ALLOW_RESET = False #True permettra de reset le FGS au pt de départ pdt l'exécution
 
 def print_debug(text):
@@ -211,7 +212,7 @@ class FGS:
             distance = math.sqrt((x-wpt_target[1])**2+(y-wpt_target[2])**2)#on calcule la distance de l'avion par rapport à la target
             print_debug("ex {} distance {}".format(ex, distance))
         else:
-            print("Waiting DIRTO")
+            print_debug("Waiting DIRTO")
 
         #si en mode dirto
         if self.dirto_on: #si dirto demandé
@@ -286,9 +287,9 @@ class FGS:
         #pas de dirto sur un pt du pdv déjà séquencé
         #le dirto est un raccourci dans le PDV
         #dirto flyby par défaut
-        print("--------ON_DIRTO--------")
+        print_debug("--------ON_DIRTO--------")
         (dirto_wpt,) = data
-        print("Requested waypoint {}".format(dirto_wpt))
+        print_debug("Requested waypoint {}".format(dirto_wpt))
         if self.waiting_dirto: #si dirto demandé
             self.waiting_dirto = False #on modifie le waiting_dirto à FALSE car on n'est plus en attente d'un dirto
         #chercher le wpt dans la liste des wpt non séquencés, via recherche linéaire
@@ -313,7 +314,7 @@ class FGS:
                 self.targetmode = FLYBY #on met le mode de la target en FlyBY
                 self.current_target_on_plan = i #on met à jour le numéro de la target en cours
                 self.dirto_on = True #on active le mode dirto
-                print("DIRTO TO {}".format(self.lastsenttarget))
+                print_debug("DIRTO TO {}".format(self.lastsenttarget))
                 IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
                 break
         
@@ -341,6 +342,20 @@ class FGS:
 
 
 if __name__=="__main__":
+    #récup du pdv depuis la CLI
+    if len(sys.argv) < 2:
+        print("Usage: python fgs_module.py <plandevol> <optionnel: (0: prod, 1: prints, 2: test noprint, 3:debug)>")
+        sys.exit(1)
+    if len(sys.argv) >= 2:
+        if os.path.exists(sys.argv[1]):
+            pdv_path = sys.argv[1]
+        else:
+            print("Chemin invalide: {}".format(sys.argv[1]))
+            sys.exit(2)
+    if len(sys.argv) >= 3:
+        DEBUG = (int(sys.argv[2])%2==1)
+        ALLOW_RESET = (int(sys.argv[2])>1)
+    #prints de l'état du débuguage
     if ALLOW_RESET:
         if DEBUG:
             print("Mode test")
@@ -356,7 +371,7 @@ if __name__=="__main__":
     IvyStart("127.255.255.255:2010") #IP à changer
     time.sleep(1.0)
     IvyBindMsg(resetFGS, RESET_REGEX)
-    fgs = FGS("fpl_formaté.txt", 0, 0, 0.2389)
+    fgs = FGS(pdv_path, 0, 0, 0.2389)
     IvyMainLoop()
 
 ##### Pour référence future #####
