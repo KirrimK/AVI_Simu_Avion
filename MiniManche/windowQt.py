@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget, QSlider, QHBoxLayout
+from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget, QSlider, QHBoxLayout, QVBoxLayout
 from PyQt5.QtCore import pyqtSignal, Qt
 from IvyCom import IvyRadio
 from backendManche import MancheRadio
@@ -13,7 +13,7 @@ class Window(QWidget):
         self.setupSliders ()
 
         self.radio = IvyRadio()
-        #self.manche = MancheRadio(self)
+        self.manche = MancheRadio(self)
         self.avion = Avion (self)
         self.pBrut = 0
         self.nzBrut = 0
@@ -28,27 +28,47 @@ class Window(QWidget):
     def setupSliders (self):
         layout = QHBoxLayout()
         self.setLayout (layout)
+        layoutTrain = QVBoxLayout ()
+        self.labelTr1 = QLabel ()
+        self.labelTr1.setText ("Trains : Sortis")
+
         self.sliderTrainAtt = QSlider (Qt.Vertical)
         self.sliderTrainAtt.setMinimum (0)
         self.sliderTrainAtt.setMaximum (1)
         self.sliderTrainAtt.setTickInterval (1)
-        self.sliderTrainAtt.setValue(1)
+        self.sliderTrainAtt.setValue(0)
         self.sliderTrainAtt.show()
-        layout.addWidget (self.sliderTrainAtt)
+        layoutTrain.addWidget (self.sliderTrainAtt)
+        layoutTrain.addWidget(self.labelTr1)
+        layout.addLayout (layoutTrain)
         self.sliderTrainAtt.valueChanged.connect (self.onSliderValueChanged)
+
+        layoutFlap = QVBoxLayout ()
+        self.labelFlap = QLabel ()
+        self.labelFlap.setText ("Flaps : configuration 1")
 
         self.sliderFlaps = QSlider (Qt.Vertical)
         self.sliderFlaps.setMaximum (4)
         self.sliderFlaps.setMinimum (0)
-        self.sliderFlaps.setValue (1)
-        layout.addWidget(self.sliderFlaps)
+        self.sliderFlaps.setValue (3)
+        layoutFlap.addWidget(self.sliderFlaps)
+        layoutFlap.addWidget(self.labelFlap)
+        layout.addLayout (layoutFlap)
         self.sliderFlaps.valueChanged.connect (self.onSliderValueChanged)
         
         self.sliderFlaps.setTickInterval (1)
         self.sliderFlaps.show ()
 
     def onSliderValueChanged (self):
-        self.avion.update_sliders(self.sliderFlaps.value(),self.sliderTrainAtt.value())
+        """Fonction appelée quand la valeur d'un des sliders est changée. Met à jour les labels 
+        et le modèle d'avion (objet self.avion"""
+        valeurFlap = 4-self.sliderFlaps.value()
+        self.labelFlap.setText ("Flaps : configuration {}".format ("lisse" if valeurFlap == 0 else valeurFlap))
+        
+
+        trainValue = 1-self.sliderTrainAtt.value()
+        self.labelTr1.setText ("Trains : {}".format("Sortis" if trainValue == 1 else "Rentrés"))
+        self.avion.update_sliders(valeurFlap,trainValue)
 
     def onButtonPushSignal (self,forceOff):
         arme = self.isAPOn
