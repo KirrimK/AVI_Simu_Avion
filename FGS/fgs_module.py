@@ -32,7 +32,7 @@ def print_debug(text):
     if DEBUG:
         print(text)
 
-InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 0, 0] #la vitesse de décollage est de 110 m/s
+InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 10*DEG2RAD, 0] #la vitesse de décollage est de 110 m/s, orientation de la piste 10deg
 
 def resetFGS(sender, *data):
     if ALLOW_RESET:
@@ -73,8 +73,9 @@ def load_flight_plan(filename):
                 listWpt.append(Waypoint(list[0],list[1],list[2],list[3],list[4]))
     return listWpt 
 
-def trianglevitesses(vwind, dirwind, vp, psi):
+def trianglevitesses(vwind, dirwind, vp, psi_a):
     #calculer vecteur vsol
+    psi = math.pi/2 -psi_a
     vsvec = [vp*math.cos(psi)+vwind*math.cos(math.pi*dirwind), vp*math.sin(psi)+vwind*math.sin(math.pi*dirwind)]
     #vsol = math.sqrt(vsvec[0]**2+vsvec[1]**2)
     route = math.atan2(vsvec[1], vsvec[0])
@@ -139,7 +140,7 @@ class FGS:
             #route_actuelle = psi + derive
             route_actuelle = trianglevitesses(self.vwind, self.dirwind, self.state_vector[3], self.state_vector[5])
             IvySendMsg("DirtoRequest")
-            self.lastsenttarget = (x, y, lastsent[2], route_actuelle) #on met à jour la dernière target envoyée
+            self.lastsenttarget = (x, y, lastsent[2], -(route_actuelle - math.pi/2)) #on met à jour la dernière target envoyée
             print_debug(self.lastsenttarget)
             IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
 
@@ -157,7 +158,7 @@ class FGS:
                 if not found_next: #si on connaît déjà la prochaine contrainte
                     contrainte = self.lastsenttarget[2] #contrainte vaut l'altitude z de la dernière target
             self.targetmode = tgtmode #on applique aussi le mode de la target
-            self.lastsenttarget = (x_wpt, y_wpt, contrainte, axe_next) #on met à jour la dernière target envoyée
+            self.lastsenttarget = (x_wpt, y_wpt, contrainte, -(axe_next - math.pi/2)) #on met à jour la dernière target envoyée
             IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
 
         #mettre à jour les infos connues sur l'avion (unpack data)
@@ -173,13 +174,13 @@ class FGS:
             distance_max = 1*NM2M #on définit la distance maximale d'écart entre l'avion et la route
             
             if self.dirto_on:
-                axe_actuel = self.lastsenttarget[3]
+                axe_actuel = math.pi/2 - self.lastsenttarget[3]
             elif self.current_target_on_plan != 0: #si la target actuelle n'est pas le premier wpt
                 print_debug("PASPREMIER")
                 wpt_target_before = self.flight_plan[self.current_target_on_plan-1].infos() #on regarde le wpt précédent la target actuelle
                 print_debug("WPT_before:")
                 print_debug(wpt_target_before)
-                axe_actuel = math.atan2(wpt_target[1]- wpt_target_before[1], wpt_target[2]- wpt_target_before[2]) #on calcule la route actuelle
+                axe_actuel = math.atan2(wpt_target[1]- wpt_target_before[1], wpt_target[2]- wpt_target_before[2])#on calcule la route actuelle
             else: #si c'est le premier wpt
                 print_debug("PREMIER")
                 axe_actuel = trianglevitesses(self.vwind, self.dirwind, vp, psi) #on calcule la route actuelle en utilisant les données du initstatevector
@@ -190,7 +191,7 @@ class FGS:
                 wpt_target_next = self.flight_plan[self.current_target_on_plan+1].infos() #on prend les données de la prochaine target
                 print_debug("WPT_next:")
                 print_debug(wpt_target_next)
-                axe_next = math.atan2(wpt_target_next[1]- wpt_target[1], wpt_target_next[2]- wpt_target[2]) #la route correspond à la route actuelle
+                axe_next = math.atan2(wpt_target_next[1]- wpt_target[1], wpt_target_next[2]- wpt_target[2])#la route correspond à la route actuelle
             else: #si la target est le dernier wpt
                 print_debug("DERNIER")
                 axe_next = axe_actuel #de même la prochain target correspond à la target actuelle
@@ -205,8 +206,8 @@ class FGS:
                 seuil_ex = vp**2/(GRAV*math.tan(self.phi_max))*math.tan(delta_khi/2) #on calcule le seuil ex
                 print_debug("seuil_ex: {}".format(seuil_ex))
 
-            print_debug("axe_actuel: {}".format(axe_actuel))
-            print_debug("axe_next: {}".format(axe_next))
+            print_debug("axe_actuel: {} (repère aéro: {})".format(axe_actuel, -(axe_actuel - math.pi/2)))
+            print_debug("axe_next: {} (repère aéro: {})".format(axe_next, -(axe_next - math.pi/2)))
 
             ex = math.sin(axe_actuel)*(x-wpt_target[1])+math.cos(axe_actuel)*(y-wpt_target[2])
             distance = math.sqrt((x-wpt_target[1])**2+(y-wpt_target[2])**2)#on calcule la distance de l'avion par rapport à la target
