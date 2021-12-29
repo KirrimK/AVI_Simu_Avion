@@ -39,7 +39,7 @@ def resetFGS(sender, *data):
         print_debug("--------FGS HAS BEEN RESET--------")
         global fgs
         fgs.unbind()
-        fgs = FGS(data[0],0,0,0.2389)
+        fgs = FGS(data[0],0,0,13.69*DEG2RAD) #0.2389)
     else:
         IvySendMsg("Resetting has not been allowed.")
 
@@ -91,6 +91,8 @@ class FGS:
         Arguments:
             - filename: string
         """
+        print("Declinaison: {}deg".format(MagneticDeclination/DEG2RAD))
+        print("Vent: Direction: {}deg Vitesse: {}kts".format(dirwind/DEG2RAD, vwind/KTS2MS))
         self.dirto_on = False #flag qui indique si on est en mode dirto ou non
         self.waiting_dirto = False #flag qui indique si on est en attente d'un dirto
         self.dirto_target_number = 0 #numéro du WPT dans le PDV en target du dirto
@@ -219,7 +221,7 @@ class FGS:
         if self.dirto_on: #si dirto demandé
             print_debug("DIRTO_ON")
             #dirto flyby par défaut
-            if (ex >= seuil_ex):
+            if (ex >= -seuil_ex):
                 print_debug("D_PASSE")
                 self.dirto_on = False
                 #Envoyer la prochaine target
@@ -242,7 +244,7 @@ class FGS:
             print_debug("NORMAL")
             if self.targetmode == OVERFLY:
                 print_debug("N_OVERFLY")
-                if (ex > -seuil_ex):
+                if (ex >= -seuil_ex):
                     print_debug("NO_PASSE")
                     #vérifier si distance inf à distmax
                     if (distance < distance_max): #si la distance de l'avion par rapport à la route est < à la distance_max
@@ -372,7 +374,7 @@ if __name__=="__main__":
     IvyStart("127.255.255.255:2010") #IP à changer
     time.sleep(1.0)
     IvyBindMsg(resetFGS, RESET_REGEX)
-    fgs = FGS(pdv_path, 0, 0, 0.2389)
+    fgs = FGS(pdv_path, 10*KTS2MS, 90*DEG2RAD, 13.69*DEG2RAD)#0.2389)
     IvyMainLoop()
 
 ##### Pour référence future #####
