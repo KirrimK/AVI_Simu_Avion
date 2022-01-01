@@ -25,14 +25,14 @@ DEG2RAD = 0.01745329
 NM2M = 1852
 GRAV = 9.81
 
+InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 14*DEG2RAD, 0] #la vitesse de décollage est de 110 m/s, orientation de la piste 14deg
+
 DEBUG = False #True printera sur la stdout
 ALLOW_RESET = False #True permettra de reset le FGS au pt de départ pdt l'exécution
 
 def print_debug(text):
     if DEBUG:
         print(text)
-
-InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 10*DEG2RAD, 0] #la vitesse de décollage est de 110 m/s, orientation de la piste 10deg
 
 def resetFGS(sender, *data):
     if ALLOW_RESET:
@@ -76,7 +76,7 @@ def load_flight_plan(filename):
 def trianglevitesses(vwind, dirwind, vp, psi_a):
     #calculer vecteur vsol
     psi = math.pi/2 -psi_a
-    vsvec = [vp*math.cos(psi)+vwind*math.cos(math.pi*dirwind), vp*math.sin(psi)+vwind*math.sin(math.pi*dirwind)]
+    vsvec = [vp*math.cos(psi)+vwind*math.cos(math.pi+dirwind), vp*math.sin(psi)+vwind*math.sin(math.pi+dirwind)]
     #vsol = math.sqrt(vsvec[0]**2+vsvec[1]**2)
     route = math.atan2(vsvec[1], vsvec[0])
     return route
@@ -293,8 +293,6 @@ class FGS:
         print_debug("--------ON_DIRTO--------")
         (dirto_wpt,) = data
         print_debug("Requested waypoint {}".format(dirto_wpt))
-        if self.waiting_dirto: #si dirto demandé
-            self.waiting_dirto = False #on modifie le waiting_dirto à FALSE car on n'est plus en attente d'un dirto
         #chercher le wpt dans la liste des wpt non séquencés, via recherche linéaire
         for i in range(self.current_target_on_plan%len(self.flight_plan), len(self.flight_plan)):
             if self.flight_plan[i].name() == dirto_wpt:
@@ -319,6 +317,7 @@ class FGS:
                 self.dirto_on = True #on active le mode dirto
                 print_debug("DIRTO TO {}".format(self.lastsenttarget))
                 IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
+                self.waiting_dirto = False #on modifie le waiting_dirto à FALSE car on n'est plus en attente d'un dirto
                 break
         
 
