@@ -94,14 +94,13 @@ class IvyPA():
 
     def on_msg_limites(self,agent,*data):
 
-            self.vmin=float(data[0])
-            self.vmax=float(data[1])
-            self.phiLim=float(data[2])
-            self.nxMin=float(data[3])
-            self.nxMax=float(data[4])
-            self.nzMin=float(data[5])
-            self.nzMax=float(data[6])
-            self.pLim=float(data[7])
+            self.vmax=float(data[0])
+            self.phiLim=float(data[1])
+            self.nxMin=float(data[2])
+            self.nxMax=float(data[3])
+            self.nzMin=float(data[4])
+            self.nzMax=float(data[5])
+            self.pLim=float(data[6])
 
     def on_msg_target(self,agent,*data):
 
