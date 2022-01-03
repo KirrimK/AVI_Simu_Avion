@@ -50,7 +50,7 @@ class IvyPA():
 
         self.vwind = float(data[0])
         self.dirwind = float(data[1])
-        print("(vwind,dirwind)=",(self.vwind,self.dirwind))
+        
     def on_msg_dm(self,agent,*data):
 
         self.dm = float(data[0])
@@ -66,7 +66,7 @@ class IvyPA():
 
         self.lateral_mode = data[0]
         if self.lateral_mode=="SelectedTrack":
-            self.route_consigne=float(data[1]) *pi/180
+            self.route_consigne=float(data[1]) * pi/180
         elif self.lateral_mode=="SelectedHeading":
             self.cap_consigne=float(data[1]) * pi/180
 
@@ -81,14 +81,14 @@ class IvyPA():
 
         self.speed_mode = data[0]
         if self.speed_mode=="SelectedSpeed":
-            self.vitesse_c=float(data[1])*1852/3600
+            self.vitesse_c=float(data[1])*1852/3600 #Vitesse de consigne reçue en kts
             self.vitesseic_to_vitessec()
         elif self.speed_mode=="SelectedMach":
             self.mach_c=float(data[1])
         
     def on_msg_FCUVertical(self,agent,*data):
 
-        self.altitude_c=float(data[0]) * 0.3048
+        self.altitude_c=float(data[0]) * 0.3048 #Altitude de consigne reçue en ft
         self.vertical_mode = data[1]
         self.vertical_val = float(data[2])
 
@@ -102,7 +102,6 @@ class IvyPA():
             self.nzMin=float(data[5])
             self.nzMax=float(data[6])
             self.pLim=float(data[7])
-            print("Limites (vmin,vmax,phiLim,nxMin,nxMax,nzMin,nzMax,pLim)=",(self.vmin,self.vmax,self.phiLim,self.nxMin,self.nxMax,self.nzMin,self.nzMax,self.pLim))
 
     def on_msg_target(self,agent,*data):
 
@@ -110,14 +109,13 @@ class IvyPA():
         self.target_Y=float(data[1])
         self.target_Z=float(data[2])
         self.target_khi=float(data[3])
-        print("Target (X,Y,Z,Khi)="+str((self.target_X,self.target_Y,self.target_Z,self.target_khi)))
+
         #Calcul de nx, nz et p à envoyer
         self.calcul_lateral()
         self.calcul_vertical()
         self.calcul_vitesse()
 
         #Envoi de nx, nz et p
-        print("(nx,nz,p)="+str((self.Nx,self.Nz,self.P)))
         self.send_msg()
 
     def send_msg(self):
@@ -126,12 +124,10 @@ class IvyPA():
     def calcul_lateral(self):
 
         if self.lateral_mode == "SelectedHeading" :
-            print("Selected Heading")
             self.p()
 
         elif self.lateral_mode == "SelectedTrack" : 
-            print("Selected Track")
-            self.routec_to_capc()
+            self.routec_to_capc() #On se ramène à une catpure de cap
             self.p()
 
         else: 
@@ -141,19 +137,22 @@ class IvyPA():
             GS = sqrt(x_dot**2 + y_dot**2)
             ey_dot=-ey/(tau_ey*GS)
 
+            #On limite pour respecter le domaine de asin
             if ey_dot<-1:
                 ey_dot=-1
             elif ey_dot>1:
                 ey_dot=1
 
-            self.route_consigne = self.target_khi + asin(ey_dot) 
+            self.route_consigne = self.target_khi + asin(ey_dot) #On se ramène à une capture de route
 
-            self.routec_to_capc()
+            self.routec_to_capc() #On se ramène à une capture de cap
             self.p()
 
     def calcul_vertical(self):
+
         if self.vertical_mode == "Selected":
             a=((self.altitude_c - self.state_vector[2])/tau_h)/self.state_vector[3]
+            #On limite pour respecter le domaine de asin
             if a>1:
                 a=1
             elif a<-1:
@@ -172,17 +171,15 @@ class IvyPA():
 
     def calcul_vitesse(self):
         if self.speed_mode == "SelectedSpeed":
-            print("SelectedSpeed")
             self.nx()
         elif self.speed_mode == "SelectedMach":
-            self.machc_to_vitessec()
+            self.machc_to_vitessec() #Conversion Mach de consigne en vitesse de consigne
             self.nx()
         elif self.speed_mode == "Mini_Manche":
             self.nx()
  
     def p(self) :
 
-        print("cap_c=",self.cap_consigne)
         angle=self.cap_consigne - self.cap + self.dm
         #Boucles permettant à l'avion de ne pas tourner de plus de 180°
         while angle>=pi:
@@ -203,7 +200,9 @@ class IvyPA():
         self.P=self.limite(-self.pLim,self.pLim,self.P)
 
     def vitesseic_to_vitessec(self):
+        
         self.vitesse_c = self.vitesse_c + self.state_vector[2]*1852/(3600*2*100*0.3048)
+        #Application des limitations
         self.vitesse_c=self.limite(self.vmin,self.vmax,self.vitesse_c)
 
     def machc_to_vitessec(self):
@@ -213,6 +212,7 @@ class IvyPA():
         self.cap_consigne=self.route_consigne - asin( (self.vwind * sin(self.route_consigne + self.dm  - self.dirwind))/(self.state_vector[3]*cos(self.state_vector[4])))
 
     def limite(self,xmin,xmax,x):
+        #Fonction servant à limiter un paramètre
         if x > xmax:
             x=xmax
         elif x < xmin:
@@ -221,6 +221,7 @@ class IvyPA():
 
     def nx(self) :
         self.Nx=(self.vitesse_c - self.state_vector[3])/(tau_v*g) + sin(self.state_vector[4])
+        #Application des limitations
         self.Nx=self.limite(self.nxMin,self.nxMax,self.Nx)
 
     def nz(self) :
