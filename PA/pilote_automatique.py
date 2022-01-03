@@ -94,13 +94,14 @@ class IvyPA():
 
     def on_msg_limites(self,agent,*data):
 
-            self.vmax=float(data[0])
-            self.phiLim=float(data[1])
-            self.nxMin=float(data[2])
-            self.nxMax=float(data[3])
-            self.nzMin=float(data[4])
-            self.nzMax=float(data[5])
-            self.pLim=float(data[6])
+            self.vmin=float(data[0])
+            self.vmax=float(data[1])
+            self.phiLim=float(data[2])
+            self.nxMin=float(data[3])
+            self.nxMax=float(data[4])
+            self.nzMin=float(data[5])
+            self.nzMax=float(data[6])
+            self.pLim=float(data[7])
 
     def on_msg_target(self,agent,*data):
 
@@ -249,7 +250,7 @@ if __name__=="__main__":
     #Abonnement aux différents messages
     IvyBindMsg(Ivypa.on_msg_wind,'^WindComponent Vwind=(\S+) dirWind=(\S+)')
     IvyBindMsg(Ivypa.on_msg_dm,'^MagneticDeclination mag=(\S+)')
-    IvyBindMsg(Ivypa.on_msg_limites,"^MM Limites vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)")
+    IvyBindMsg(Ivypa.on_msg_limites,"^MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)")
     IvyBindMsg(Ivypa.on_msg_FCULateral,'^FCULateral Mode=(\S+) Val=(\S+)')
     IvyBindMsg(Ivypa.on_msg_SpeedMach,'^FCUSpeedMach Mode=(\S+) Val=(\S+)')
     IvyBindMsg(Ivypa.on_msg_speed_mm,"^MM VC=(\S+)")
