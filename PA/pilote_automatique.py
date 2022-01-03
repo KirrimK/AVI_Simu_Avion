@@ -32,7 +32,7 @@ class IvyPA():
         self.Nz=0
         self.P=0
         self.vmin = 0
-        self.vamx = 0
+        self.vmax = 0
         self.phiLim = 0
         self.nxMin = 0
         self.nxMax = 0
