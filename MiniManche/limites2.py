@@ -155,14 +155,14 @@ class Avion:
 		if self.PA==False:
 			if self.phi>=67*DEG2RAD:
 				self.p_lim=[-15*DEG2RAD,0]
-			if self.phi<=-67*DEG2RAD:
+			elif self.phi<=-67*DEG2RAD:
 				self.p_lim=[0,15*DEG2RAD]
 			else:
 				self.p_lim=[-15*DEG2RAD,15*DEG2RAD] #pour l'exprimer en rad
 		else:
 			if self.phi>=33*DEG2RAD:
 				self.p_lim=[-15*DEG2RAD,0]
-			if self.phi<=-33*DEG2RAD:
+			elif self.phi<=-33*DEG2RAD:
 				self.p_lim=[0,15*DEG2RAD]
 			else:
 				self.p_lim=[-15*DEG2RAD,15*DEG2RAD] #pour l'exprimer en radian/s
