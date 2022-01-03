@@ -103,14 +103,14 @@ class Window(QWidget):
             self.radio.sendAircraftCommand (nX, nZ, p)
 
     def traitement (self):
-        nzMin = -1
-        nzMax = 2
+        nzMin = self.avion.nz_lim [0]
+        nzMax = self.avion.nz_lim [1]
         if self.nzBrut >0.1:
-            nzCons = 1+(self.nzBrut)/(nzMax-1)
+            nzCons = 1+self.nzBrut*(nzMax-1)
             if nzCons >nzMax:
                 nzCons = 1
         elif self.nzBrut <-0.1:
-            nzCons = 1 - (self.nzBrut)/(nzMin -1)
+            nzCons = 1-(nzMin-1)*self.nzBrut
             if nzCons < nzMin :
                 nzCons = 1
         else : 
