@@ -25,6 +25,8 @@ DEG2RAD = 0.01745329
 NM2M = 1852
 GRAV = 9.81
 
+InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 14*DEG2RAD, 0] #la vitesse de décollage est de 110 m/s, orientation de la piste 14deg
+
 DEBUG = False #True printera sur la stdout
 ALLOW_RESET = False #True permettra de reset le FGS au pt de départ pdt l'exécution
 
@@ -32,14 +34,12 @@ def print_debug(text):
     if DEBUG:
         print(text)
 
-InitStateVector=[0, 0, 0, 214*KTS2MS, 0, 0, 0] #la vitesse de décollage est de 110 m/s
-
 def resetFGS(sender, *data):
     if ALLOW_RESET:
         print_debug("--------FGS HAS BEEN RESET--------")
         global fgs
         fgs.unbind()
-        fgs = FGS(data[0],0,0,0.2389)
+        fgs = FGS(data[0],0,0,13.69*DEG2RAD) #0.2389)
     else:
         IvySendMsg("Resetting has not been allowed.")
 
@@ -73,9 +73,10 @@ def load_flight_plan(filename):
                 listWpt.append(Waypoint(list[0],list[1],list[2],list[3],list[4]))
     return listWpt 
 
-def trianglevitesses(vwind, dirwind, vp, psi):
+def trianglevitesses(vwind, dirwind, vp, psi_a):
     #calculer vecteur vsol
-    vsvec = [vp*math.cos(psi)+vwind*math.cos(math.pi*dirwind), vp*math.sin(psi)+vwind*math.sin(math.pi*dirwind)]
+    psi = math.pi/2 -psi_a
+    vsvec = [vp*math.cos(psi)+vwind*math.cos(math.pi+dirwind), vp*math.sin(psi)+vwind*math.sin(math.pi+dirwind)]
     #vsol = math.sqrt(vsvec[0]**2+vsvec[1]**2)
     route = math.atan2(vsvec[1], vsvec[0])
     return route
@@ -90,6 +91,8 @@ class FGS:
         Arguments:
             - filename: string
         """
+        print("Declinaison: {}deg".format(MagneticDeclination/DEG2RAD))
+        print("Vent: Direction: {}deg Vitesse: {}kts".format(dirwind/DEG2RAD, vwind/KTS2MS))
         self.dirto_on = False #flag qui indique si on est en mode dirto ou non
         self.waiting_dirto = False #flag qui indique si on est en attente d'un dirto
         self.dirto_target_number = 0 #numéro du WPT dans le PDV en target du dirto
@@ -139,7 +142,7 @@ class FGS:
             #route_actuelle = psi + derive
             route_actuelle = trianglevitesses(self.vwind, self.dirwind, self.state_vector[3], self.state_vector[5])
             IvySendMsg("DirtoRequest")
-            self.lastsenttarget = (x, y, lastsent[2], route_actuelle) #on met à jour la dernière target envoyée
+            self.lastsenttarget = (x, y, lastsent[2], -(route_actuelle - math.pi/2)) #on met à jour la dernière target envoyée
             print_debug(self.lastsenttarget)
             IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
 
@@ -157,7 +160,7 @@ class FGS:
                 if not found_next: #si on connaît déjà la prochaine contrainte
                     contrainte = self.lastsenttarget[2] #contrainte vaut l'altitude z de la dernière target
             self.targetmode = tgtmode #on applique aussi le mode de la target
-            self.lastsenttarget = (x_wpt, y_wpt, contrainte, axe_next) #on met à jour la dernière target envoyée
+            self.lastsenttarget = (x_wpt, y_wpt, contrainte, -(axe_next - math.pi/2)) #on met à jour la dernière target envoyée
             IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
 
         #mettre à jour les infos connues sur l'avion (unpack data)
@@ -173,13 +176,13 @@ class FGS:
             distance_max = 1*NM2M #on définit la distance maximale d'écart entre l'avion et la route
             
             if self.dirto_on:
-                axe_actuel = self.lastsenttarget[3]
+                axe_actuel = math.pi/2 - self.lastsenttarget[3]
             elif self.current_target_on_plan != 0: #si la target actuelle n'est pas le premier wpt
                 print_debug("PASPREMIER")
                 wpt_target_before = self.flight_plan[self.current_target_on_plan-1].infos() #on regarde le wpt précédent la target actuelle
                 print_debug("WPT_before:")
                 print_debug(wpt_target_before)
-                axe_actuel = math.atan2(wpt_target[1]- wpt_target_before[1], wpt_target[2]- wpt_target_before[2]) #on calcule la route actuelle
+                axe_actuel = math.atan2(wpt_target[1]- wpt_target_before[1], wpt_target[2]- wpt_target_before[2])#on calcule la route actuelle
             else: #si c'est le premier wpt
                 print_debug("PREMIER")
                 axe_actuel = trianglevitesses(self.vwind, self.dirwind, vp, psi) #on calcule la route actuelle en utilisant les données du initstatevector
@@ -190,7 +193,7 @@ class FGS:
                 wpt_target_next = self.flight_plan[self.current_target_on_plan+1].infos() #on prend les données de la prochaine target
                 print_debug("WPT_next:")
                 print_debug(wpt_target_next)
-                axe_next = math.atan2(wpt_target_next[1]- wpt_target[1], wpt_target_next[2]- wpt_target[2]) #la route correspond à la route actuelle
+                axe_next = math.atan2(wpt_target_next[1]- wpt_target[1], wpt_target_next[2]- wpt_target[2])#la route correspond à la route actuelle
             else: #si la target est le dernier wpt
                 print_debug("DERNIER")
                 axe_next = axe_actuel #de même la prochain target correspond à la target actuelle
@@ -205,8 +208,8 @@ class FGS:
                 seuil_ex = vp**2/(GRAV*math.tan(self.phi_max))*math.tan(delta_khi/2) #on calcule le seuil ex
                 print_debug("seuil_ex: {}".format(seuil_ex))
 
-            print_debug("axe_actuel: {}".format(axe_actuel))
-            print_debug("axe_next: {}".format(axe_next))
+            print_debug("axe_actuel: {} (repère aéro: {})".format(axe_actuel, -(axe_actuel - math.pi/2)))
+            print_debug("axe_next: {} (repère aéro: {})".format(axe_next, -(axe_next - math.pi/2)))
 
             ex = math.sin(axe_actuel)*(x-wpt_target[1])+math.cos(axe_actuel)*(y-wpt_target[2])
             distance = math.sqrt((x-wpt_target[1])**2+(y-wpt_target[2])**2)#on calcule la distance de l'avion par rapport à la target
@@ -218,7 +221,7 @@ class FGS:
         if self.dirto_on: #si dirto demandé
             print_debug("DIRTO_ON")
             #dirto flyby par défaut
-            if (ex >= seuil_ex):
+            if (ex >= -seuil_ex):
                 print_debug("D_PASSE")
                 self.dirto_on = False
                 #Envoyer la prochaine target
@@ -241,7 +244,7 @@ class FGS:
             print_debug("NORMAL")
             if self.targetmode == OVERFLY:
                 print_debug("N_OVERFLY")
-                if (ex > -seuil_ex):
+                if (ex >= -seuil_ex):
                     print_debug("NO_PASSE")
                     #vérifier si distance inf à distmax
                     if (distance < distance_max): #si la distance de l'avion par rapport à la route est < à la distance_max
@@ -290,8 +293,6 @@ class FGS:
         print_debug("--------ON_DIRTO--------")
         (dirto_wpt,) = data
         print_debug("Requested waypoint {}".format(dirto_wpt))
-        if self.waiting_dirto: #si dirto demandé
-            self.waiting_dirto = False #on modifie le waiting_dirto à FALSE car on n'est plus en attente d'un dirto
         #chercher le wpt dans la liste des wpt non séquencés, via recherche linéaire
         for i in range(self.current_target_on_plan%len(self.flight_plan), len(self.flight_plan)):
             if self.flight_plan[i].name() == dirto_wpt:
@@ -316,6 +317,7 @@ class FGS:
                 self.dirto_on = True #on active le mode dirto
                 print_debug("DIRTO TO {}".format(self.lastsenttarget))
                 IvySendMsg(TARGET_MSG.format(*self.lastsenttarget)) #on envoie la dernière target
+                self.waiting_dirto = False #on modifie le waiting_dirto à FALSE car on n'est plus en attente d'un dirto
                 break
         
 
@@ -371,7 +373,7 @@ if __name__=="__main__":
     IvyStart("127.255.255.255:2010") #IP à changer
     time.sleep(1.0)
     IvyBindMsg(resetFGS, RESET_REGEX)
-    fgs = FGS(pdv_path, 0, 0, 0.2389)
+    fgs = FGS(pdv_path, 10*KTS2MS, 90*DEG2RAD, 13.69*DEG2RAD)#0.2389)
     IvyMainLoop()
 
 ##### Pour référence future #####
