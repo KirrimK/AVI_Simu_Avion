@@ -373,5 +373,5 @@ if __name__=="__main__":
     IvyStart("127.255.255.255:2010")
     time.sleep(1.0)
     IvyBindMsg(resetFGS, RESET_REGEX)
-    fgs = FGS(pdv_path, 10*KTS2MS, 90*DEG2RAD, 13.69*DEG2RAD)
+    fgs = FGS(pdv_path, 0*KTS2MS, 0*DEG2RAD, 13.69*DEG2RAD)
     IvyMainLoop()
