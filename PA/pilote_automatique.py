@@ -250,7 +250,7 @@ if __name__=="__main__":
     #Abonnement aux différents messages
     IvyBindMsg(Ivypa.on_msg_wind,'^WindComponent Vwind=(\S+) dirWind=(\S+)')
     IvyBindMsg(Ivypa.on_msg_dm,'^MagneticDeclination mag=(\S+)')
-    IvyBindMsg(Ivypa.on_msg_limites,"^MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)")
+    IvyBindMsg(Ivypa.on_msg_limites,"^MM Limites vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)")
     IvyBindMsg(Ivypa.on_msg_FCULateral,'^FCULateral Mode=(\S+) Val=(\S+)')
     IvyBindMsg(Ivypa.on_msg_SpeedMach,'^FCUSpeedMach Mode=(\S+) Val=(\S+)')
     IvyBindMsg(Ivypa.on_msg_speed_mm,"^MM VC=(\S+)")
