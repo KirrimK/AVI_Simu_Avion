@@ -1,7 +1,7 @@
 #import des modules utiles
 from math import *
 
-#Pour les valeurs des limites, on part des infos données par SimCockpit pour un Airbus A320
+#Pour les valeurs des limites, on part des infos données par SmartCockpit pour un Airbus A320
 
 #vitesse désignera la vitesse propre de l'avion qui nous sera donnée par le State Vector -> en m/s
 #altitude = hauteur exprimée en m = z donné par le State Vector 
@@ -13,7 +13,7 @@ from math import *
 
 #gradient de température qui nous intéresse : -6,5K tous les km
 
-#Pour le calcul de la vitesse de consigne= vitesse indiquée on définit arbitrairement la valeur du cost index = 0.50 pour un A320 volant avec Air France sur du vol moyen courier -> à voir plus tard pour l'instant faire avec le modèle proposé par M.Rouillard = mettre une vitesse de commande dépendant de l'altitude 
+
 
 #Constante utile
 KT2MS=0.514444
@@ -28,7 +28,7 @@ CI=0.35 #Cost Index
 
 
 class Avion:
-	def __init__(self,window):#penser à virer tous les paramètres une fois tous les tests effectués et à tout mettre à 0 après
+	def __init__(self,window):
 		self.alt=0
 		self.vitesse=100*KT2MS#pas initialisé à 0
 		self.Mach=False#booléen
