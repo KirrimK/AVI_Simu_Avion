@@ -357,7 +357,7 @@ if __name__=="__main__":
     if len(sys.argv) >= 3:
         DEBUG = (int(sys.argv[2])%2==1)
         ALLOW_RESET = (int(sys.argv[2])>1)
-    #prints de l'état du débuguage
+    #prints de l'état du débogage
     if ALLOW_RESET:
         if DEBUG:
             print("Mode test")
@@ -370,20 +370,8 @@ if __name__=="__main__":
             print("Mode production")
 
     IvyInit("FGS", "Ready")
-    IvyStart("127.255.255.255:2010") #IP à changer
+    IvyStart("127.255.255.255:2010")
     time.sleep(1.0)
     IvyBindMsg(resetFGS, RESET_REGEX)
-    fgs = FGS(pdv_path, 10*KTS2MS, 90*DEG2RAD, 13.69*DEG2RAD)#0.2389)
+    fgs = FGS(pdv_path, 10*KTS2MS, 90*DEG2RAD, 13.69*DEG2RAD)
     IvyMainLoop()
-
-##### Pour référence future #####
-#IvySendMsg("")
-#IvyBindMsg(callback, "regex")
-
-#def generic_callback(sender, *data):
-#    pass
-
-
-#with FGS("", fdve, efd, rftr) as fgs_test1:
-#    dujghb fpathconf
-#    tests
