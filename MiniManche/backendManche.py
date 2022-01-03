@@ -92,7 +92,7 @@ class MancheRadio():
 
             if ((abs(self.window.pBrut) < 0.5) and (abs(joystick.get_axis(0)) > 0.5)) or ((abs(self.window.nzBrut) < 0.5) and (abs(joystick.get_axis(1)) > 0.5)):
                 print("Désactivation du PA")
-                self.window.radio.onBoutonAPPush(True)
+                self.window.radio.onBoutonAPPush(None,True)
 
             self.window.pBrut = joystick.get_axis(0)
             textPrint.tprint(screen, "Axis 0 value: {:>6.3f}".format(joystick.get_axis(0)))
