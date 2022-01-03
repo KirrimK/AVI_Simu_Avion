@@ -71,7 +71,7 @@ class MancheRadio():
                     print("Joystick button pressed.")
                     if joystick.get_button(0) == 1:
                         print("Désactivation du PA")
-                        self.window.radio.onBoutonAPPush(True)
+                        self.window.radio.onBoutonAPPush(None,True)
                 elif event.type == pygame.JOYBUTTONUP:
                     print("Joystick button released.")
 
