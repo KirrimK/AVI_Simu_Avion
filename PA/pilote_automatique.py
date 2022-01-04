@@ -189,10 +189,10 @@ class IvyPA():
 
         phic=(Ve/g) * ((angle)/tau_psi)
         #Saturation en angle de tangage, 33°
-        if phic<-33*pi/180:
-            phic=-33*pi/180
-        elif phic>33*pi/180:
-            phic=33*pi/180
+        if phic<-self.phiLim:
+            phic=-self.phiLim
+        elif phic>self.phiLim:
+            phic=self.phiLim
         
         self.P=(1/tau_phi) * ( phic - (self.phi))
         
