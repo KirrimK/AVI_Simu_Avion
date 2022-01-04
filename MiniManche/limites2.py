@@ -173,7 +173,7 @@ class Avion:
 		if self.PA==False:
 			self.phi_lim=[-67*DEG2RAD,67*DEG2RAD]
 		else:
-			self.phi_lim=[-33*DEG2RAD,33*DEG2RAD]
+			self.phi_lim=[-25*DEG2RAD,25*DEG2RAD]
 
 	def gamma_limites(self):
 		if abs(self.gamma)>25*DEG2RAD:
