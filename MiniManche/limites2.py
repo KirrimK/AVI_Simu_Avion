@@ -110,10 +110,10 @@ class Avion:
 		if self.train==True and self.config_physique==0:
 			if self.alt < 10000*FT2M:
 				self.Mach=False
-				self.vitesse_lim=250*KT2MS
+				self.vitesse_i=250*KT2MS
 			else:
 				self.Mach=False
-				self.vitesse_lim=280*KT2MS
+				self.vitesse_i=280*KT2MS
 
 		if self.config_physique==1:
 			self.Mach=False
@@ -173,7 +173,7 @@ class Avion:
 		if self.PA==False:
 			self.phi_lim=[-67*DEG2RAD,67*DEG2RAD]
 		else:
-			self.phi_lim=[-33*DEG2RAD,33*DEG2RAD]
+			self.phi_lim=[-25*DEG2RAD,25*DEG2RAD]
 
 	def gamma_limites(self):
 		if abs(self.gamma)>25*DEG2RAD:
@@ -201,6 +201,4 @@ class Avion:
 
 
 
-#à faire : repasser tout en méthodes de la classe avion et rajouter les limites en paramètres
-		#faire la connexion avec les sliders de la fenêtre window
-		#connexion avec le state vector pour alt,vitesse,gamma et phi
+

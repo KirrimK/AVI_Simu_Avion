@@ -21,7 +21,7 @@ class IvyRadio ():
         self.initialMessage = "^InitStateVector"
 
         #Messages à envoyer : 
-        self.infoLimites = "MM Limites vMax={} phiLim={} nxMin={} nxMax={} nzMin={} nzMax={} pLim={}"
+        self.infoLimites = "MM Limites vMin=0 vMax={} phiLim={} nxMin={} nxMax={} nzMin={} nzMax={} pLim={}"
         self.commandeVitesse = "MM VC={}"
         self.FCUAP = "FCUAP1 {}"
         self.commandeModeleNx = "APNxControl nx={}"
