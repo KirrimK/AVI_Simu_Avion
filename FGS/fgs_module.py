@@ -9,7 +9,7 @@ STATEVEC_REGEX = "StateVector x=(\S+) y=(\S+) z=(\S+) Vp=(\S+) fpa=(\S+) psi=(\S
 WINDCOMP_REGEX = "WindComponent VWind={} dirWind={}"
 DM_REGEX = "MagneticDeclination MagneticDeclination={}"
 DIRTO_REGEX = "DIRTO Wpt=(\S+)"
-TIMESTART_REGEX = "Time t=1.0"
+TIMESTART_REGEX = "^Time t=1\.0"
 LIMITES_REGEX = "MM Limites vMin=(\S+) vMax=(\S+) phiLim=(\S+) nxMin=(\S+) nxMax=(\S+) nzMin=(\S+) nzMax=(\S+) pLim=(\S+)"
 
 RESET_REGEX = "RESETFGS (\S+)" #uniquement à des fins de tests unitaires
@@ -329,7 +329,7 @@ class FGS:
             - WindComponent
             - MagneticDeclination
         """
-        IvySendMsg("StateVector x={} y={} z={} Vp={} fpa={} psi={} phi={}".format(*InitStateVector))
+        IvySendMsg("InitStateVector x={} y={} z={} Vp={} fpa={} psi={} phi={}".format(*InitStateVector))
         IvySendMsg("WindComponent VWind={} dirWind={}".format(self.vwind,self.dirwind))
         IvySendMsg("MagneticDeclination MagneticDeclination={}".format(self.dm))
 
